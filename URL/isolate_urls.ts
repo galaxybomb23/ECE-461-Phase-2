@@ -2,7 +2,13 @@
 import * as fs from 'fs';
 
 
-// Function pares URL file into array of URLs
+/**
+ * Parses a file containing URLs and returns them as an array of strings.
+ * If the file does not exist, returns 0.
+ * 
+ * @param {string} filename - The path to the file containing the URLs.
+ * @returns {string[] | number} An array of URLs if the file exists, or `0` if the file does not exist.
+ */
 export function parse_urls(filename: string): string[] | number{
 
     // Return 0 (for error) if file does not exist
