@@ -1,5 +1,5 @@
 import { parse_urls } from "./URL/isolate_urls";
-import { test_url } from "./URL/test_url";
+import { test_url, async_test_url } from "./URL/test_url";
 
 // Automatically run the function when the script is executed
 const filename = process.argv[2]; // Get the filename from command-line arguments
