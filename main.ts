@@ -8,11 +8,14 @@ if (filename) {
     if (urls == 0){
         console.error("File Not Found");
     }
+    console.log(urls);
     if (Array.isArray(urls) && urls.length > 0) {
         for (let i = 0; i < urls.length; i++) {
-            test_url(urls[i]).then(exists => {
-                console.log('URL ', urls[i], 'exists:', exists);
-            });
+            if(test_url(urls[i])){
+                console.log('URL ', urls[i], 'exists');
+            } else {
+                console.log('URL ', urls[i], 'does not exists');
+            }
         }
         console.log("After for loop");
     }

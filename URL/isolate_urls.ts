@@ -12,5 +12,5 @@ export function parse_urls(filename: string): string[] | number{
 
     const file_content = fs.readFileSync(filename, 'utf-8');    // Read file content
 
-    return((file_content.split('\n')).reverse());   // Return array of URLs
+    return(file_content.split('\n'));   // Return array of URLs
 }
