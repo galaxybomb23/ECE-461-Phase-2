@@ -1,5 +1,5 @@
-import { parse_urls } from "./URL/isolate_urls";
-import { test_url, async_test_url } from "./URL/test_url";
+import { parse_urls } from "./../src/URL/isolate_urls";
+import { test_url, async_test_url } from "./../src/URL/test_url";
 
 
 const filename = process.argv[2]; // Get the filename from command-line arguments
