@@ -1,8 +1,21 @@
-# ECE-461
-Group Repository For ECE 461 Project
+# ECE 461 Project
 
-## Team Members
-# Miller Kodish
-# Daniel Shkembi
-# Fran Ramirez
-# Alfredo Barandearan
+## Description
+
+## Installation
+
+### Prerequisites
+
+### Steps
+
+## Usage
+
+## Options
+
+## Configuration
+
+## Contributing
+
+## License
+
+## Contact
