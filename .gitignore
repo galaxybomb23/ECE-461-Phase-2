@@ -1,2 +1,24 @@
-**/*.js
+# Ignore environment variables
 .env
+
+# Ignore node_modules directory
+node_modules/
+
+# Ignore package lock
+package-lock.json
+
+# Ignore log files
+*.log
+
+# Ignore compiled output (if applicable)
+dist/
+build/
+
+# Ignore temporary files
+*.tmp
+*.swp
+*.swo
+
+# Ignore system files
+.DS_Store
+Thumbs.db

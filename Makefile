@@ -1,5 +1,5 @@
 test_urls:
-	@tsc main.ts && node main.js sample_url_file.txt
+	@ts-node main.ts sample_url_file.txt
 
-clean:
-	@rm **/*.js
+clean_js:
+	@find . -type f -name "*.js" | xargs rm -f

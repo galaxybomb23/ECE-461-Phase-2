@@ -1,0 +1,2 @@
+#!/bin/bash
+npx ts-node main.ts sample_url_file.txt

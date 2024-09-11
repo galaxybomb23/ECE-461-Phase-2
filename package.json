@@ -1,0 +1,28 @@
+{
+  "name": "project",
+  "version": "1.0.0",
+  "description": "Group Repository For ECE 461 Project",
+  "main": "main.js",
+  "scripts": {
+  "build": "tsc",
+  "start": "",
+  "test_url": "ts-node src/main.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Miller11k/ECE-461.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Miller11k/ECE-461/issues"
+  },
+  "homepage": "https://github.com/Miller11k/ECE-461#readme",
+  "devDependencies": {
+    "typescript": "^5.6.2"
+  },
+  "dependencies": {
+    "ts-node": "^10.9.2"
+  }
+}
