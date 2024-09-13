@@ -1,24 +1,38 @@
-import { parse_urls } from "./../src/URL/isolate_urls";
-import { test_url, async_test_url } from "./../src/URL/test_url";
+import { test_url, url_type } from "./../src/url";
+import { formatJSON, initJSON } from "../src/json";
+import { exit } from "process";
 
+// Mark the function as async to use await
+async function main() {
+    let link = process.argv[2]; // Get the link from command-line arguments
+    console.log(`link provided: ${link}`); // Print the link
 
-const filename = process.argv[2]; // Get the filename from command-line arguments
-if (filename) {
-    const urls = parse_urls(filename);
-    if (urls == 0){
-        console.error("File Not Found");
-    }
-    console.log(urls);
-    if (Array.isArray(urls) && urls.length > 0) {
-        for (let i = 0; i < urls.length; i++) {
-            if(test_url(urls[i])){
-                console.log('URL ', urls[i], 'exists');
+    if (link) {
+        console.log(`Testing URL: ${link}\n`);
+
+        try {
+            // Await the result of test_url, assuming it's async
+            const exists = await test_url(link);
+            if (exists) {
+                console.log('URL', link, 'exists\n');
             } else {
-                console.log('URL ', urls[i], 'does not exists');
+                console.log('URL', link, 'does not exist\n');
+                return;
             }
+
+            console.log("Creating data array from URLs...");
+            let repo_JSON = initJSON();
+            repo_JSON.URL = link;
+            console.log("Data array created:", repo_JSON);
+
+        } catch (error) {
+            console.error('Error testing the URL:', error);
         }
-        console.log("After for loop");
+    } else {
+        console.error("No valid URLs found or an unexpected result from parse_urls\n");
     }
-} else {
-    console.error('Please provide a filename as a command-line argument.');
 }
+
+// Call the main function
+main();
+

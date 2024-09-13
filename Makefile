@@ -1,5 +1,13 @@
-test_urls:
-	@ts-node main.ts sample_url_file.txt
+# Makefile
 
+test_url:
+	@ts-node test/url_test.ts https://github.com/cloudinary/cloudinary_npm
+	@ts-node test/url_test.ts https://www.npmjs.com/package/express
+	@ts-node test/url_test.ts https://github.com/nullivex/nodist
+	@ts-node test/url_test.ts https://github.com/lodash/lodash
+	@ts-node test/url_test.ts https://www.npmjs.com/package/browserify
+
+testall:
+	@make test_url
 clean_js:
 	@find . -type f -name "*.js" | xargs rm -f

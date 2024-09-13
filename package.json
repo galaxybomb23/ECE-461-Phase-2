@@ -4,8 +4,9 @@
   "description": "Group Repository For ECE 461 Project",
   "main": "main.js",
   "scripts": {
-  "build": "tsc",
-  "test_url": "ts-node test/url_test.ts"
+    "build": "tsc",
+    "test_url": "make test_url",
+    "test_githubAPI": "ts-node test/githubAPI_test.ts"
   },
   "repository": {
     "type": "git",
@@ -19,9 +20,12 @@
   },
   "homepage": "https://github.com/Miller11k/ECE-461#readme",
   "devDependencies": {
+    "@types/axios": "^0.14.0",
     "typescript": "^5.6.2"
   },
   "dependencies": {
+    "@octokit/rest": "^21.0.2",
+    "axios": "^1.7.7",
     "ts-node": "^10.9.2"
   }
 }
