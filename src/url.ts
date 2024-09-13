@@ -1,3 +1,5 @@
+import * as fs from 'fs';
+
 /**
  * Checks if a given URL is accessible by making a HEAD request.
  * Returns true if the response is successful (status code in the range 200-299),
@@ -36,4 +38,23 @@ export function url_type(url: string): string {
     }
 
     return "other"; // Return "other" if no match
+}
+
+/**
+ * Parses a file containing URLs and returns them as an array of strings.
+ * If the file does not exist, returns 0.
+ * 
+ * @param {string} filename - The path to the file containing the URLs.
+ * @returns {string[] | number} An array of URLs if the file exists, or `0` if the file does not exist.
+ */
+export function parse_urls(filename: string): string[] | number{
+
+    // Return 0 (for error) if file does not exist
+    if(!fs.existsSync(filename)){
+        return 0;
+    }
+
+    const file_content = fs.readFileSync(filename, 'utf-8');    // Read file content
+
+    return(file_content.split('\n'));   // Return array of URLs
 }

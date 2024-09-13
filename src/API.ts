@@ -11,7 +11,7 @@ import axios from 'axios';
  * @returns {Promise<any>} A promise that resolves to the JSON data from the API response.
  * @throws {Error} Throws an error if the HTTP request fails.
  */
-async function fetchJsonFromApi(apiLink: string): Promise<any> {
+export async function fetchJsonFromApi(apiLink: string): Promise<any> {
     try {
         const response = await axios.get(apiLink);
         return response.data; // This returns the response as JSON
