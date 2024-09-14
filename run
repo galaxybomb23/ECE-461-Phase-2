@@ -2,21 +2,30 @@
 
 # Function to perform install tasks
 install_tasks() {
-    echo "Running install tasks..."
+    # echo "Running install tasks..."
     
-    npm install --save-dev @types/node
-    npm install sync-request
-    sudo npm install -g ts-node
+    # npm install --save-dev @types/node
+    # npm install sync-request
+    # sudo npm install -g ts-node
 
-    npm install @octokit/rest
+    # npm install @octokit/rest
 
+    tsc index.ts
 }
 
 # Function to process the URL_FILE
 process_url_file() {
     local url_file="$1"
-    echo "Processing URL file: $url_file"
     # Add your URL_FILE processing tasks here
+}
+
+# Function to run the project
+run_project() {
+    if [ -f "index.js" ]; then
+        node index.js "$1"
+    else
+        tsc index.ts && node index.js "$1"
+    fi
 }
 
 # Check for exactly 1 argument
@@ -29,7 +38,7 @@ fi
 if [ "$1" = "install" ]; then
     install_tasks
 else
-    process_url_file "$1"
+    run_project "$1"  # Pass the argument to run_project
 fi
 
 exit 0
