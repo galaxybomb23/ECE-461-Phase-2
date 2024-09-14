@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import { exit } from 'process';
 
 /**
  * Checks if a given URL is accessible by making a HEAD request.
@@ -47,11 +48,11 @@ export function url_type(url: string): string {
  * @param {string} filename - The path to the file containing the URLs.
  * @returns {string[] | number} An array of URLs if the file exists, or `0` if the file does not exist.
  */
-export function parse_urls(filename: string): string[] | number{
+export function parse_urls(filename: string): string[]{
 
-    // Return 0 (for error) if file does not exist
+    // Exit 1 (for error) if file does not exist
     if(!fs.existsSync(filename)){
-        return 0;
+        exit(1);
     }
 
     const file_content = fs.readFileSync(filename, 'utf-8');    // Read file content
