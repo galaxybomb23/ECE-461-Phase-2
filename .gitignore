@@ -13,6 +13,7 @@ package-lock.json
 # Ignore compiled output (if applicable)
 dist/
 build/
+coverage/
 
 # Ignore temporary files
 *.tmp
