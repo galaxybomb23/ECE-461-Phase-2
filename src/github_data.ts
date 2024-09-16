@@ -1,4 +1,4 @@
-import { DatabaseSync } from "node:sqlite";
+import sqlite3 from 'sqlite3';
 import { fetchJsonFromApi } from "./API";
 
 /**
