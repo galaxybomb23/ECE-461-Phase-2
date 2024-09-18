@@ -17,16 +17,17 @@ export async function fetchJsonFromApi(apiLink: string): Promise<any> {
     // Get the token from environment variables
     const token = process.env.GITHUB_TOKEN;
 
-    // Configure the request with the Authorization header
-    const config = {
-        headers: {
-            'Authorization': `token ${token}`,
-            'Accept': 'application/vnd.github.v3+json'
-        }
+    // Set up headers conditionally based on the presence of the token
+    const headers: any = {
+        'Accept': 'application/vnd.github.v3+json',
     };
 
+    if (token) {
+        headers['Authorization'] = `token ${token}`;
+    }
+
     try {
-        const response = await axios.get(apiLink, config);
+        const response = await axios.get(apiLink, { headers });
         return response.data; // This returns the response as JSON
     } catch (error) {
         console.error('Error fetching data from API:', error);
