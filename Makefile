@@ -8,6 +8,11 @@ test_url:
 testall:
 	@make test_url
 
+refresh_node:
+	@rm -rf node_modules
+	@npm install
+	@npm install axios@latest
+
 clean_js:
 	@find . -type f -name "*.js" -exec rm -f {} +
 	@find dist -mindepth 1 -delete
