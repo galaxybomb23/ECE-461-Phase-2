@@ -16,7 +16,7 @@ describe('GitHub API Tests', () => {
     ];
 
     // Mock the API to resolve with the mocked data
-    (fetchJsonFromApi as jest.Mock).mockResolvedValue(mockGitHubData);
+    jest.mocked(fetchJsonFromApi).mockResolvedValue(mockGitHubData);
 
     // Call the main function that interacts with the API
     const githubData = await fetchJsonFromApi(
