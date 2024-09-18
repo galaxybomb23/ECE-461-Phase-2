@@ -10,14 +10,12 @@ import { fetchJsonFromApi } from "./API";
  */
 export function getGitHubAPILink(url: string, endpoint: string = ''): string {
     // Split the URL to extract the repository owner and name.
-    let urlParts = url.split('/');
-    let owner = urlParts[urlParts.length - 2];
-    let repo = urlParts[urlParts.length - 1];
+    let urlParts = url.split('/');  // Split link into parts
+    let owner = urlParts[urlParts.length - 2];  // Isolate owner
+    let repo = urlParts[urlParts.length - 1];   // Isolate repository name
 
-    // Construct and return the API URL with the optional endpoint.
-    return `https://api.github.com/repos/${owner}/${repo}${endpoint ? '/' + endpoint : ''}`;
+    return `https://api.github.com/repos/${owner}/${repo}${endpoint ? '/' + endpoint : ''}`;    // Return API link with endpoint
 }
-
 
 /**
  * Extracts contribution counts from the GitHub API response data.
