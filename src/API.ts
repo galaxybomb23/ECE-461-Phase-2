@@ -1,4 +1,6 @@
 import axios from 'axios';
+import * as dotenv from 'dotenv';
+dotenv.config();
 
 /**
  * Fetches JSON data from a given API endpoint.
@@ -12,8 +14,19 @@ import axios from 'axios';
  * @throws {Error} Throws an error if the HTTP request fails.
  */
 export async function fetchJsonFromApi(apiLink: string): Promise<any> {
+    // Get the token from environment variables
+    const token = process.env.GITHUB_TOKEN;
+
+    // Configure the request with the Authorization header
+    const config = {
+        headers: {
+            'Authorization': `token ${token}`,
+            'Accept': 'application/vnd.github.v3+json'
+        }
+    };
+
     try {
-        const response = await axios.get(apiLink);
+        const response = await axios.get(apiLink, config);
         return response.data; // This returns the response as JSON
     } catch (error) {
         console.error('Error fetching data from API:', error);
