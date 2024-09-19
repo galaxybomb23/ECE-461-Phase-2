@@ -26,6 +26,7 @@ interface DataObject {
  * @returns {DataObject} An initialized DataObject with null metrics.
  */
 export function initJSON(): DataObject {
+    // Initialize the default data object with all fields set to null or empty strings.
     const defaultData: DataObject = {
         URL: '',
         NetScore: null,
@@ -45,11 +46,36 @@ export function initJSON(): DataObject {
     return defaultData;
 }
 
-
+/**
+ * Converts a DataObject to a single-line JSON string with spaces between each metric.
+ *
+ * @param {DataObject} data - The DataObject to be formatted.
+ * @returns {string} A single-line JSON string representation of the DataObject with spaces between metrics.
+ */
 export function formatJSON(data: DataObject): string {
-    // Start string with "{"
-    // For each element in the JSON, add the element name and value
-    // End string with "}"
+    // Convert the DataObject to a JSON string.
+    let jsonString = JSON.stringify(data); 
 
-    return '';
+    // Add spaces after commas to separate metrics.
+    jsonString = jsonString.replace(/,(?=\S)/g, ', '); 
+
+    return jsonString;
 }
+
+// Sample Calls
+// /**
+//  * Main function to demonstrate the creation and formatting of a DataObject.
+//  */
+// function main() {
+//     // Initialize an empty DataObject
+//     const data: DataObject = initJSON();
+    
+//     // Format the DataObject into a single-line JSON string with spaces
+//     const flattenedJson: string = formatJSON(data);
+    
+//     // Print the result
+//     console.log(flattenedJson);
+// }
+
+// // Call the main function to run the example
+// main();
