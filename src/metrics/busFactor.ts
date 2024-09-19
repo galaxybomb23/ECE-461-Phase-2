@@ -11,6 +11,10 @@ import { fetchJsonFromApi } from './../API';
  * @returns {number} - The calculated Bus Factor, rounded to the nearest tenth.
  */
 export function getBusFactor(data: any[]): number {
+  if (data.length === 0) { // Check if no contributor data
+    return 0;  // Return low Bus Factor
+  }
+
   let threshold = 0.95;   // Define a threshold for % critical for project maintenance
   // For some reason 0.975 threshold gets the sample numbers ¯\_(ツ)_/¯
 
@@ -39,36 +43,36 @@ export function getBusFactor(data: any[]): number {
 
 
 // Sample Calls
-async function calculateBusFactor1() {
-  try {
-    let data = await fetchJsonFromApi(getGitHubAPILink("https://github.com/lodash/lodash", "contributors"));
-    let bus_factor = getBusFactor(data);
-    console.log(`Bus Factor Lodash: ${bus_factor}`);
-  } catch (error) {
-    console.error('Error fetching data:', error);
-  }
-}
+// async function calculateBusFactor1() {
+//   try {
+//     let data = await fetchJsonFromApi(getGitHubAPILink("https://github.com/lodash/lodash", "contributors"));
+//     let bus_factor = getBusFactor(data);
+//     console.log(`Bus Factor Lodash: ${bus_factor}`);
+//   } catch (error) {
+//     console.error('Error fetching data:', error);
+//   }
+// }
 
-async function calculateBusFactor2() {
-  try {
-    let data = await fetchJsonFromApi(getGitHubAPILink("https://github.com/cloudinary/cloudinary_npm", "contributors"));
-    let bus_factor = getBusFactor(data);
-    console.log(`Bus Factor Cloudinary_NPM: ${bus_factor}`);
-  } catch (error) {
-    console.error('Error fetching data:', error);
-  }
-}
+// async function calculateBusFactor2() {
+//   try {
+//     let data = await fetchJsonFromApi(getGitHubAPILink("https://github.com/cloudinary/cloudinary_npm", "contributors"));
+//     let bus_factor = getBusFactor(data);
+//     console.log(`Bus Factor Cloudinary_NPM: ${bus_factor}`);
+//   } catch (error) {
+//     console.error('Error fetching data:', error);
+//   }
+// }
 
-async function calculateBusFactor3() {
-  try {
-    let data = await fetchJsonFromApi(getGitHubAPILink("https://github.com/nullivex/nodist", "contributors"));
-    let bus_factor = getBusFactor(data);
-    console.log(`Bus Factor Nodist: ${bus_factor}`);
-  } catch (error) {
-    console.error('Error fetching data:', error);
-  }
-}
+// async function calculateBusFactor3() {
+//   try {
+//     let data = await fetchJsonFromApi(getGitHubAPILink("https://github.com/nullivex/nodist", "contributors"));
+//     let bus_factor = getBusFactor(data);
+//     console.log(`Bus Factor Nodist: ${bus_factor}`);
+//   } catch (error) {
+//     console.error('Error fetching data:', error);
+//   }
+// }
 
-calculateBusFactor1();
-calculateBusFactor2();
-calculateBusFactor3();
+// calculateBusFactor1();
+// calculateBusFactor2();
+// calculateBusFactor3();

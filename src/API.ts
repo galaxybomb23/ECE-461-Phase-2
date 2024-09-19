@@ -30,15 +30,12 @@ export async function fetchJsonFromApi(apiLink: string): Promise<any> {
         const response = await axios.get(apiLink, { headers });
         return response.data; // This returns the response as JSON
     } catch (error: any) {
-
-        if (apiLink.includes("/license")) { // Ok to have empty response for license (means there is no license)
-            return {}; // Return an empty object for "license" endpoint errors
-        }
-
-        console.error('Error fetching data from API:', error.message);
-
-        // Check if the endpoint is "license" and return an empty object in this case
         
-        throw error; // Rethrow the error for other endpoints
+        // Since we've already checked repository exists, no need to throw error
+        // Just means lack of data
+
+        // Add to log file
+
+        return {}; // Return empty dataset if no data can be retrieved
     }
 }
