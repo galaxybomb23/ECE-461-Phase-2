@@ -10,7 +10,10 @@ export function getLicence(license_data: any): number {
     return license_score;
 }
 
-// function main() {
+
+// Sample Calls
+
+// function calculateLicense() {
 //     // const link = "https://github.com/Miller11k/ECE-461"; // Replace with actual GitHub link
 //     const link = "https://github.com/nodists/nodist"; // Replace with actual GitHub link
 //     const API_link = getGitHubAPILink(link, "license");
@@ -18,7 +21,7 @@ export function getLicence(license_data: any): number {
 //     fetchJsonFromApi(API_link)
 //         .then((license_data) => {
 //             const score = getLicence(license_data);
-//             console.log("License score:", score);
+//             console.log("License score (License):", score);
 //         })
 //         .catch((error: any) => {
 //             if (error.response && error.response.status === 404) {
@@ -31,4 +34,25 @@ export function getLicence(license_data: any): number {
 //         });
 // }
 
-// main();
+// function calculateNoLicense() {
+//     const link = "https://github.com/Miller11k/ECE-461"; // Replace with actual GitHub link
+//     const API_link = getGitHubAPILink(link, "license");
+
+//     fetchJsonFromApi(API_link)
+//         .then((license_data) => {
+//             const score = getLicence(license_data);
+//             console.log("License score (No License):", score);
+//         })
+//         .catch((error: any) => {
+//             if (error.response && error.response.status === 404) {
+//                 // Handle 404 error silently
+//                 console.warn("License data not found.");
+//             } else {
+//                 // Log general error message
+//                 console.error("Error fetching license data:", error.message);
+//             }
+//         });
+// }
+
+// calculateLicense();
+// calculateNoLicense();
