@@ -6,12 +6,12 @@ dotenv.config();
  * Fetches JSON data from a given API endpoint.
  *
  * This function performs an HTTP GET request to the specified `apiLink` and returns the response data in JSON format.
- * If an error occurs during the request, it logs the error and rethrows it for further handling.
+ * If an error occurs during the request, it logs the error and returns an empty object if the error is for the "license" endpoint.
  *
  * @async
  * @param {string} apiLink - The URL of the API endpoint from which to fetch data.
- * @returns {Promise<any>} A promise that resolves to the JSON data from the API response.
- * @throws {Error} Throws an error if the HTTP request fails.
+ * @returns {Promise<any>} A promise that resolves to the JSON data from the API response or an empty object if there is an error for the "license" endpoint.
+ * @throws {Error} Throws an error if the HTTP request fails and the endpoint is not "license".
  */
 export async function fetchJsonFromApi(apiLink: string): Promise<any> {
     // Get the token from environment variables
@@ -29,8 +29,16 @@ export async function fetchJsonFromApi(apiLink: string): Promise<any> {
     try {
         const response = await axios.get(apiLink, { headers });
         return response.data; // This returns the response as JSON
-    } catch (error) {
-        console.error('Error fetching data from API:', error);
-        throw error; // Rethrow the error to handle it where the function is called
+    } catch (error: any) {
+
+        if (apiLink.includes("/license")) { // Ok to have empty response for license (means there is no license)
+            return {}; // Return an empty object for "license" endpoint errors
+        }
+
+        console.error('Error fetching data from API:', error.message);
+
+        // Check if the endpoint is "license" and return an empty object in this case
+        
+        throw error; // Rethrow the error for other endpoints
     }
 }
