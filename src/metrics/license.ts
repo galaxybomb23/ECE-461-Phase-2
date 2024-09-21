@@ -3,21 +3,33 @@ import { fetchJsonFromApi } from "../API";
 import { getTimestampWithThreeDecimalPlaces } from "./getLatency";
 
 export async function getLicenseScore(URL: string): Promise<{ score: number, latency: number }> {
+     // TODO: Add logfile handling
     const latency_start = getTimestampWithThreeDecimalPlaces();
-    
+     // TODO: Add logfile handling
+
+      // TODO: Add logfile handling
     // Fetch license data
     const API_link = getGitHubAPILink(URL, 'license'); // Adjust endpoint as needed
+     // TODO: Add logfile handling
+
+      // TODO: Add logfile handling
     const license_data = await fetchJsonFromApi(API_link);
-    
+     // TODO: Add logfile handling
+
+
+      // TODO: Add logfile handling
     // Calculate license score
     let license_score = 0;
     if (license_data.license) {
         license_score = 1; // You can adjust this based on your criteria
     }
+     // TODO: Add logfile handling
 
+      // TODO: Add logfile handling
     // Calculate latency in milliseconds
     const latencyMs = parseFloat((getTimestampWithThreeDecimalPlaces() - latency_start).toFixed(2));
-
+     // TODO: Add logfile handling
+     
     return { score: license_score, latency: latencyMs };
 }
 

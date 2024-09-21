@@ -31,13 +31,17 @@ export async function test_url(url: string): Promise<boolean> {
  */
 export function url_type(url: string): string {
     // Define the regex pattern to match specific URLs
+    // TODO: Add logfile handling
     let regex = new RegExp("(github|npmjs)\\.com", "i");
     let match = regex.exec(url);
     
+    // TODO: Add logfile handling
     if (match) {
+        // TODO: Add logfile handling
         return match[1];  // Return the captured group (github or npmjs)
     }
 
+    // TODO: Add logfile handling
     return "other"; // Return "other" if no match
 }
 
@@ -50,48 +54,60 @@ export function url_type(url: string): string {
  */
 export function parse_urls(filename: string): string[] {
     // Exit 1 (for error) if file does not exist
+    // TODO: Add logfile handling
     if (!fs.existsSync(filename)) {
-        // Add log
+        // TODO: Add logfile handling
       exit(1);
     }
+    // TODO: Add logfile handling
   
     const file_content = fs.readFileSync(filename, 'utf-8'); // Read file content
+    // TODO: Add logfile handling
   
     // Return an empty array if the file content is empty
+    // TODO: Add logfile handling
     if (!file_content) {
+        // TODO: Add logfile handling
       return [];
     }
+    // TODO: Add logfile handling
   
     return file_content.split('\n'); // Return array of URLs
 }
 
 
 export async function get_valid_urls(filename: string): Promise<string[]> {
+    // TODO: Add logfile handling
     let args = process.argv.slice(2);
 
     if (args.length != 1) {     // Check for invalid number of arguments
-        // TODO: Add log
+        // TODO: Add logfile handling
         exit(1);
     }
 
-    
+    // TODO: Add logfile handling
     let url_array = parse_urls(filename);
+    // TODO: Add logfile handling
 
     let valid_urls = [];
 
+    // TODO: Add logfile handling
     for(let i = 0; i < url_array.length; i++){
         try{
+            // TODO: Add logfile handling
             if(await test_url(url_array[i])){
+                // TODO: Add logfile handling
                 valid_urls.push(url_array[i]);
             }
             else{
-                // Log that URL does not work
+                // TODO: Add logfile handling
             }
         } catch (error) {
-            // Log error
+            // TODO: Add logfile handling
             exit(1);
         }
     }
-
+    
+    // TODO: Add logfile handling
     return(valid_urls);
 }

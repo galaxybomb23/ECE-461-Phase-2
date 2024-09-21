@@ -6,6 +6,10 @@ install_tasks() {
     npm install
     npm install axios@latest
     tsc index.ts
+    # Initialize a .env file
+    # Create github token line
+    # Create log level line
+    # Create log file line
 }
 
 test_tasks() {

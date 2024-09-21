@@ -9,7 +9,7 @@ testall:
 	@make test_url
 
 test:
-	@ tsc index.ts && node index.js /home/miller/mknotes/ECE/461/Project/__tests__/data/sample_urls.txt
+	@ tsc src/index.ts && node src/index.js /home/miller/mknotes/ECE/461/Project/__tests__/data/sample_urls.txt
 
 refresh:
 	@find . -type f -name "*.js" -exec rm -f {} +

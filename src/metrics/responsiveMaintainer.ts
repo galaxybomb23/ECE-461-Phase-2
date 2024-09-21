@@ -9,16 +9,23 @@ import { getTimestampWithThreeDecimalPlaces } from './getLatency';
  * @returns {Promise<{ score: number; latency: number }>} The Responsive Maintainer score (0-1) and fetch latency.
  */
 export async function calculateResponsiveMaintainer(URL: string): Promise<{ score: number, latency: number }> {
+     // TODO: Add logfile handling
     const latency_start = getTimestampWithThreeDecimalPlaces();
+     // TODO: Add logfile handling
 
+      // TODO: Add logfile handling
     const API_link = getGitHubAPILink(URL);
+     // TODO: Add logfile handling
 
+      // TODO: Add logfile handling
     // Fetch repository data and issues data in one call
     const [repoData, issuesData] = await Promise.all([
         fetchJsonFromApi(API_link),
         fetchJsonFromApi(`${API_link}/issues?state=all`)
     ]);
+     // TODO: Add logfile handling
 
+      // TODO: Add logfile handling
     let openIssuesCount = 0;
     let closedIssuesCount = 0;
     
@@ -29,16 +36,22 @@ export async function calculateResponsiveMaintainer(URL: string): Promise<{ scor
             openIssuesCount++;
         }
     }
-    
+     // TODO: Add logfile handling
+
+      // TODO: Add logfile handling
     // If open_issues_count from repoData is available, use it
     openIssuesCount = repoData.open_issues_count || openIssuesCount;
-    
+     // TODO: Add logfile handling
 
+      // TODO: Add logfile handling
     const ratio = closedIssuesCount > 0 ? openIssuesCount / closedIssuesCount : 0; // Avoid division by zero
     const score = parseFloat((1 / (1 + ratio)).toFixed(2));
-    
+     // TODO: Add logfile handling
+
+      // TODO: Add logfile handling
     // Calculate latency in milliseconds
     const latencyMs = parseFloat((getTimestampWithThreeDecimalPlaces() - latency_start).toFixed(2));
+     // TODO: Add logfile handling
 
     return { score, latency: latencyMs };
 }

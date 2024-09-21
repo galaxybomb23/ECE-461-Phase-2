@@ -26,6 +26,7 @@ interface DataObject {
  * @returns {DataObject} An initialized DataObject with null metrics.
  */
 export function initJSON(): DataObject {
+     // TODO: Add logfile handling
     // Initialize the default data object with all fields set to null or empty strings.
     const defaultData: DataObject = {
         URL: '',
@@ -42,6 +43,7 @@ export function initJSON(): DataObject {
         License: null,
         License_Latency: null
     };
+     // TODO: Add logfile handling
 
     return defaultData;
 }
@@ -54,10 +56,14 @@ export function initJSON(): DataObject {
  */
 export function formatJSON(data: DataObject): string {
     // Convert the DataObject to a JSON string.
+     // TODO: Add logfile handling
     let jsonString = JSON.stringify(data); 
+     // TODO: Add logfile handling
 
+      // TODO: Add logfile handling
     // Add spaces after commas to separate metrics.
     jsonString = jsonString.replace(/,(?=\S)/g, ', '); 
+     // TODO: Add logfile handling
 
     return jsonString;
 }
@@ -70,9 +76,12 @@ export function formatJSON(data: DataObject): string {
  */
 
 export function extractLastIssuesUrlFromJson(packageData: any): string | null {
+     // TODO: Add logfile handling
     const versions = packageData.versions;
     let lastIssuesUrl: string | null = null;
+     // TODO: Add logfile handling
 
+      // TODO: Add logfile handling
     // Iterate through the versions object
     for (const version in versions) {
         if (versions.hasOwnProperty(version)) {
@@ -82,14 +91,19 @@ export function extractLastIssuesUrlFromJson(packageData: any): string | null {
             }
         }
     }
+     // TODO: Add logfile handling
 
+     // TODO: Add logfile handling
     if (lastIssuesUrl) {
-    
+        // TODO: Add logfile handling
         return lastIssuesUrl;
     } else {
+        // TODO: Add logfile handling
         console.warn('No GitHub issues URL found in any version.');
+        // TODO: Add logfile handling
         return null;
     }
+     // TODO: Add logfile handling
 }
 
 // Sample Calls

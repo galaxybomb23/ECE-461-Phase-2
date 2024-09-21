@@ -1,17 +1,18 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+import * as dotenv from 'dotenv';
+dotenv.config();
 
 // Environment variables for the log file path and name
 const logFilePath = process.env.LOG_FILE || path.join(__dirname, 'app.log');
+const env_logLevel = process.env.LOG_LEVEL ? parseInt(process.env.LOG_LEVEL) : 0; 
 
 // LogLevel enum for defining log severity levels
 enum LogLevel {
-    DEBUG = 'DEBUG',
+    SILENT = 'SILENT',
     INFO = 'INFO',
-    WARNING = 'WARNING',
-    ERROR = 'ERROR',
-    CRITICAL = 'CRITICAL'
+    DEBUG = 'DEBUG'
 }
 
 // Function to ensure the log file exists, if not, create it
@@ -27,33 +28,38 @@ function formatTimestamp(): string {
 }
 
 // Function to write a log entry to the log file
-export function logMessage(level: LogLevel, component: string, message: string) {
+export function logMessage(component: string, messages: string[]) {
+
+    let log_message: string;
+    let type: string;
+    console.log(env_logLevel);
+
+    if(env_logLevel  === 1){
+        log_message = messages[0];  // Set message to Info message
+        type = 'INFO';
+    } else {
+        log_message = messages[1];  // Set message to Debug message
+        type = 'DEBUG';
+    }
+
     ensureLogFileExists();  // Ensure the log file exists before writing to it
     const timestamp = formatTimestamp();
-    const logEntry = `[${timestamp}][${level}][${component}] ${message}\n`;
+    const logEntry = `[${timestamp}][${type}][${component}] ${log_message}\n`;
     fs.appendFileSync(logFilePath, logEntry, 'utf-8');
 }
 
 
 
-// Function to print log entries that match the specified log level
-export function printLogsByLevel(level: LogLevel) {
-    ensureLogFileExists();  // Ensure the log file exists before reading it
+// Sample Calls
 
-    // Read the entire log file
-    const logFileContent = fs.readFileSync(logFilePath, 'utf-8');
-    const logEntries = logFileContent.split('\n');
+// // Example of logging an INFO message
+// logMessage('Database', ['Connection established successfully.', 'Connecting to the database...']);
 
-    // Filter and print log entries that match the specified level
-    logEntries.forEach((logEntry) => {
-        if (logEntry.includes(`[${level}]`)) {
-            console.log(logEntry);
-        }
-    });
-}
+// // Example of logging a DEBUG message
+// logMessage('UserService', ['User details fetched.', 'Fetching user details for user ID: 123']);
 
-// Example log messages
-logMessage(LogLevel.INFO, "API Call", "Called GitHub for contributor data");
-logMessage(LogLevel.ERROR, "Test Link", "URL was unable to connect");
+// // Example of logging an INFO message for an API call
+// logMessage('API', ['Received a request for /api/data.', 'Making an API call to fetch data.']);
 
-
+// // Example of logging a DEBUG message for an error
+// logMessage('ErrorHandler', ['An error occurred while processing the request.', 'Error: Invalid user input.']);

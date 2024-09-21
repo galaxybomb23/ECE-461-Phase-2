@@ -16,25 +16,31 @@ dotenv.config();
 export async function fetchJsonFromApi(apiLink: string): Promise<any> {
     // Get the token from environment variables
     const token = process.env.GITHUB_TOKEN;
+    // TODO: Add logfile handling
 
     // Set up headers conditionally based on the presence of the token
     const headers: any = {
+        // TODO: Add logfile handling
         'Accept': 'application/vnd.github.v3+json',
     };
 
+    // TODO: Add logfile handling
     if (token) {
+        // TODO: Add logfile handling
         headers['Authorization'] = `token ${token}`;
     }
 
     try {
+        // TODO: Add logfile handling
         const response = await axios.get(apiLink, { headers });
+        // TODO: Add logfile handling
         return response.data; // This returns the response as JSON
     } catch (error: any) {
-        
+
+        // TODO: Add logfile handling
+
         // Since we've already checked repository exists, no need to throw error
         // Just means lack of data
-
-        // Add to log file
 
         return {}; // Return empty dataset if no data can be retrieved
     }

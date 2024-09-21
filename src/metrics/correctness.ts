@@ -9,10 +9,16 @@ import { getTimestampWithThreeDecimalPlaces } from './getLatency';
  * @returns {Promise<{ score: number; latency: number; }>} The Correctness score (0-1) and fetch latency.
  */
 export async function calculateCorrectness(URL: string): Promise<{ score: number; latency: number; }> {
+     // TODO: Add logfile handling
     const latency_start = getTimestampWithThreeDecimalPlaces();
+     // TODO: Add logfile handling
 
+     // TODO: Add logfile handling
     const API_link = getGitHubAPILink(URL);
+     // TODO: Add logfile handling
 
+
+     // TODO: Add logfile handling
     // Fetch the data in parallel
     const [
         repoData, 
@@ -27,7 +33,9 @@ export async function calculateCorrectness(URL: string): Promise<{ score: number
         fetchJsonFromApi(API_link + '/issues?state=closed'), // Fetch closed issues
         fetchJsonFromApi(API_link + '/issues?state=open')    // Fetch open issues
     ]);
+     // TODO: Add logfile handling
 
+    // TODO: Add logfile handling
     // Calculate useful metrics
     const totalIssues = closedIssuesData.length + openIssuesData.length;
     const totalPullRequests = closedPullData.length + openPullData.length;
@@ -36,15 +44,19 @@ export async function calculateCorrectness(URL: string): Promise<{ score: number
     const pullRequestMergeRate = totalPullRequests ? closedPullData.length / totalPullRequests : 1;
 
     const openIssuesCount = repoData.open_issues_count || openIssuesData.length;
+     // TODO: Add logfile handling
 
     // Define a reasonable maximum number of issues and pull requests
     const MAX_ISSUES = 150;
     const MAX_PULL_REQUESTS = 300;
 
+     // TODO: Add logfile handling
     // Normalize the open issues and pull requests to create a score
     const issueScore = 1 - Math.min(openIssuesCount / MAX_ISSUES, 1);
     const pullRequestScore = Math.min(closedPullData.length / MAX_PULL_REQUESTS, 1);
+     // TODO: Add logfile handling
 
+     // TODO: Add logfile handling
     // Combine the metrics: you can weight them according to their importance
     const combinedScore = 0.4 * issueScore + 0.3 * pullRequestScore + 0.15 * issueResolutionRate + 0.15 * pullRequestMergeRate;
 
@@ -53,6 +65,7 @@ export async function calculateCorrectness(URL: string): Promise<{ score: number
 
     // Calculate latency in milliseconds
     const latencyMs = parseFloat((getTimestampWithThreeDecimalPlaces() - latency_start).toFixed(2));
+     // TODO: Add logfile handling
 
     return { score: roundedScore, latency: latencyMs };
 }
