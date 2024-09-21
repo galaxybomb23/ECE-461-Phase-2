@@ -1,80 +1,41 @@
-import { getGitHubAPILink } from "../github_data";
+import { getGitHubAPILink } from "../githubData";
 import { fetchJsonFromApi } from "../API";
 import { getTimestampWithThreeDecimalPlaces } from "./getLatency";
+import { logMessage } from '../logFile';
 
+/**
+ * Fetches the license data for a given GitHub repository URL and calculates a license score.
+ * The score is 1 if a license is found, and 0 otherwise.
+ * 
+ * @param {string} URL - The GitHub repository URL.
+ * @returns {Promise<{ score: number, latency: number }>} - An object containing the license score and the fetch latency in milliseconds.
+ */
 export async function getLicenseScore(URL: string): Promise<{ score: number, latency: number }> {
-     // TODO: Add logfile handling
-    const latency_start = getTimestampWithThreeDecimalPlaces();
-     // TODO: Add logfile handling
+    logMessage('getLicenseScore', ['Starting license score calculation.', `URL: ${URL}`]);
+    
+    const latency_start = getTimestampWithThreeDecimalPlaces(); // Start timing the fetch
+    logMessage('getLicenseScore', ['Latency tracking started.', `Start timestamp: ${latency_start}`]);
 
-      // TODO: Add logfile handling
-    // Fetch license data
+    // Construct the API link for fetching license data
     const API_link = getGitHubAPILink(URL, 'license'); // Adjust endpoint as needed
-     // TODO: Add logfile handling
+    logMessage('getLicenseScore', ['Constructed API link for license data.', `API link: ${API_link}`]);
 
-      // TODO: Add logfile handling
+    // Fetch the license data from the API
     const license_data = await fetchJsonFromApi(API_link);
-     // TODO: Add logfile handling
+    logMessage('getLicenseScore', ['License data fetched successfully.', `License data: ${JSON.stringify(license_data)}`]);
 
-
-      // TODO: Add logfile handling
-    // Calculate license score
+    // Calculate the license score based on the presence of license data
     let license_score = 0;
     if (license_data.license) {
-        license_score = 1; // You can adjust this based on your criteria
+        license_score = 1; // Score of 1 indicates a license is present
+        logMessage('getLicenseScore', ['License score calculated.', `Score: ${license_score}`]);
+    } else {
+        logMessage('getLicenseScore', ['No license found.', 'Score remains 0.']);
     }
-     // TODO: Add logfile handling
 
-      // TODO: Add logfile handling
     // Calculate latency in milliseconds
-    const latencyMs = parseFloat((getTimestampWithThreeDecimalPlaces() - latency_start).toFixed(2));
-     // TODO: Add logfile handling
-     
-    return { score: license_score, latency: latencyMs };
+    const latencyMs = parseFloat((getTimestampWithThreeDecimalPlaces() - latency_start).toFixed(3));
+    logMessage('getLicenseScore', ['Latency calculation complete.', `Latency: ${latencyMs} ms`]);
+
+    return { score: license_score, latency: latencyMs }; // Return the score and latency
 }
-
-
-// Sample Calls
-
-// function calculateLicense() {
-//     // const link = "https://github.com/Miller11k/ECE-461"; // Replace with actual GitHub link
-//     const link = "https://github.com/nodists/nodist"; // Replace with actual GitHub link
-//     const API_link = getGitHubAPILink(link, "license");
-    // fetchJsonFromApi(API_link)
-    //     .then((license_data) => {
-    //         const score = getLicence(license_data);
-    //         console.log("License score (License):", score);
-    //     })
-//         .catch((error: any) => {
-//             if (error.response && error.response.status === 404) {
-//                 // Handle 404 error silently
-//                 console.warn("License data not found.");
-//             } else {
-//                 // Log general error message
-//                 console.error("Error fetching license data:", error.message);
-//             }
-//         });
-// }
-
-// function calculateNoLicense() {
-//     const link = "https://github.com/Miller11k/ECE-461"; // Replace with actual GitHub link
-//     const API_link = getGitHubAPILink(link, "license");
-
-//     fetchJsonFromApi(API_link)
-//         .then((license_data) => {
-//             const score = getLicence(license_data);
-//             console.log("License score (No License):", score);
-//         })
-//         .catch((error: any) => {
-//             if (error.response && error.response.status === 404) {
-//                 // Handle 404 error silently
-//                 console.warn("License data not found.");
-//             } else {
-//                 // Log general error message
-//                 console.error("Error fetching license data:", error.message);
-//             }
-//         });
-// }
-
-// calculateLicense();
-// calculateNoLicense();

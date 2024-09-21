@@ -1,5 +1,6 @@
-import { getNodeJsAPILink } from '../src/nodejs_data';
-import { fetchJsonFromApi } from '../src/API';
+import { getNodeJsAPILink } from '../src/npmjsData';
+import { fetchJsonFromApi } from './../src/API';
+
 jest.mock('../src/API', () => ({
   fetchJsonFromApi: jest.fn(),
 }));

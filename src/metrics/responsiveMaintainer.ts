@@ -1,34 +1,37 @@
-import { getGitHubAPILink } from '../github_data';
+import { getGitHubAPILink } from '../githubData';
 import { fetchJsonFromApi } from '../API';
 import { getTimestampWithThreeDecimalPlaces } from './getLatency';
+import { logMessage } from '../logFile';
 
 /**
  * Calculates the Responsive Maintainer score based on the recency of updates.
- * If the package has been updated within the last 6 months, give a higher score.
+ * A higher score is given if the package has been updated within the last 6 months.
+ * 
  * @param {string} URL - The GitHub repository URL.
- * @returns {Promise<{ score: number; latency: number }>} The Responsive Maintainer score (0-1) and fetch latency.
+ * @returns {Promise<{ score: number; latency: number }>} - The Responsive Maintainer score (0-1) and fetch latency.
  */
-export async function calculateResponsiveMaintainer(URL: string): Promise<{ score: number, latency: number }> {
-     // TODO: Add logfile handling
+export async function calculateResponsiveMaintainer(URL: string): Promise<{ score: number; latency: number }> {
+    logMessage('calculateResponsiveMaintainer', ['Starting Responsive Maintainer score calculation.', `Repository URL: ${URL}`]);
+    
+    // Start latency tracking
     const latency_start = getTimestampWithThreeDecimalPlaces();
-     // TODO: Add logfile handling
+    logMessage('calculateResponsiveMaintainer', ['Latency tracking started.']);
 
-      // TODO: Add logfile handling
+    // Construct the GitHub API link for the repository
     const API_link = getGitHubAPILink(URL);
-     // TODO: Add logfile handling
+    logMessage('calculateResponsiveMaintainer', ['Constructed API link for repository data.', `API Link: ${API_link}`]);
 
-      // TODO: Add logfile handling
-    // Fetch repository data and issues data in one call
+    // Fetch repository data and issues data concurrently
     const [repoData, issuesData] = await Promise.all([
         fetchJsonFromApi(API_link),
         fetchJsonFromApi(`${API_link}/issues?state=all`)
     ]);
-     // TODO: Add logfile handling
+    logMessage('calculateResponsiveMaintainer', ['Fetched repository and issues data successfully.']);
 
-      // TODO: Add logfile handling
     let openIssuesCount = 0;
     let closedIssuesCount = 0;
-    
+
+    // Count open and closed issues
     for (const issue of issuesData) {
         if (issue.closed_at) {
             closedIssuesCount++;
@@ -36,31 +39,20 @@ export async function calculateResponsiveMaintainer(URL: string): Promise<{ scor
             openIssuesCount++;
         }
     }
-     // TODO: Add logfile handling
+    logMessage('calculateResponsiveMaintainer', [`Counted issues - Open: ${openIssuesCount}, Closed: ${closedIssuesCount}`]);
 
-      // TODO: Add logfile handling
-    // If open_issues_count from repoData is available, use it
+    // Use open_issues_count from repoData if available
     openIssuesCount = repoData.open_issues_count || openIssuesCount;
-     // TODO: Add logfile handling
+    logMessage('calculateResponsiveMaintainer', ['Using open issues count from repoData.', `Open Issues Count: ${openIssuesCount}`]);
 
-      // TODO: Add logfile handling
+    // Calculate the ratio of open to closed issues
     const ratio = closedIssuesCount > 0 ? openIssuesCount / closedIssuesCount : 0; // Avoid division by zero
-    const score = parseFloat((1 / (1 + ratio)).toFixed(2));
-     // TODO: Add logfile handling
+    const score = parseFloat((1 / (1 + ratio)).toFixed(2)); // Calculate score
+    logMessage('calculateResponsiveMaintainer', ['Calculated Responsive Maintainer score.', `Score: ${score}`]);
 
-      // TODO: Add logfile handling
     // Calculate latency in milliseconds
-    const latencyMs = parseFloat((getTimestampWithThreeDecimalPlaces() - latency_start).toFixed(2));
-     // TODO: Add logfile handling
+    const latencyMs = parseFloat((getTimestampWithThreeDecimalPlaces() - latency_start).toFixed(3));
+    logMessage('calculateResponsiveMaintainer', ['Calculated fetch latency.', `Latency: ${latencyMs} ms`]);
 
-    return { score, latency: latencyMs };
+    return { score, latency: latencyMs }; // Return score and latency
 }
-
-// // Sample Call
-// async function main() {
-//     const url = 'https://github.com/lodash/lodash'; // Replace with your desired URL
-//     const { score, latency } = await calculateResponsiveMaintainer(url); // Calculate Responsive Maintainer score and latency
-//     console.log(`Responsive Maintainer Score: ${score}`);
-//     console.log(`Fetch Latency: ${latency} seconds`);
-// }
-// main();

@@ -1,23 +1,24 @@
+import { logMessage } from "./logFile";
+
 /**
  * Interface representing a data object used for storing repository metrics.
  * 
  * @interface DataObject
- * @typedef {DataObject}
  */
 interface DataObject {
-    URL: string;
-    NetScore: number | null;
-    NetScore_Latency: number | null;
-    RampUp: number | null;
-    RampUp_Latency: number | null;
-    Correctness: number | null;
-    Correctness_Latency: number | null;
-    BusFactor: number | null;
-    BusFactor_Latency: number | null;
-    ResponsiveMaintainer: number | null;
-    ResponsiveMaintainer_Latency: number | null;
-    License: number | null;
-    License_Latency: number | null;
+    URL: string;                                    // The URL of the repository
+    NetScore: number | null;                        // Overall net score of the repository
+    NetScore_Latency: number | null;                // Latency for net score
+    RampUp: number | null;                          // Ramp-up metric
+    RampUp_Latency: number | null;                  // Latency for ramp-up metric
+    Correctness: number | null;                     // Correctness metric
+    Correctness_Latency: number | null;             // Latency for correctness metric
+    BusFactor: number | null;                       // Bus factor metric
+    BusFactor_Latency: number | null;               // Latency for bus factor metric
+    ResponsiveMaintainer: number | null;            // Responsive maintainer score
+    ResponsiveMaintainer_Latency: number | null;    // Latency for responsive maintainer score
+    License: number | null;                         // License metric
+    License_Latency: number | null;                 // Latency for license metric
 }
 
 /**
@@ -26,8 +27,8 @@ interface DataObject {
  * @returns {DataObject} An initialized DataObject with null metrics.
  */
 export function initJSON(): DataObject {
-     // TODO: Add logfile handling
-    // Initialize the default data object with all fields set to null or empty strings.
+    logMessage('initJSON - Start', ['Initializing DataObject with null metrics.', 'Creating default metrics object.']);
+    
     const defaultData: DataObject = {
         URL: '',
         NetScore: null,
@@ -43,8 +44,8 @@ export function initJSON(): DataObject {
         License: null,
         License_Latency: null
     };
-     // TODO: Add logfile handling
-
+    
+    logMessage('initJSON - Complete', ['DataObject initialized successfully.', JSON.stringify(defaultData)]);
     return defaultData;
 }
 
@@ -55,71 +56,46 @@ export function initJSON(): DataObject {
  * @returns {string} A single-line JSON string representation of the DataObject with spaces between metrics.
  */
 export function formatJSON(data: DataObject): string {
-    // Convert the DataObject to a JSON string.
-     // TODO: Add logfile handling
-    let jsonString = JSON.stringify(data); 
-     // TODO: Add logfile handling
+    logMessage('formatJSON - Start', ['Formatting DataObject to JSON string.', `DataObject: ${JSON.stringify(data)}`]);
+    
+    let jsonString = JSON.stringify(data);
+    logMessage('formatJSON - JSON String Created', ['Initial JSON string created.', jsonString]);
 
-      // TODO: Add logfile handling
-    // Add spaces after commas to separate metrics.
-    jsonString = jsonString.replace(/,(?=\S)/g, ', '); 
-     // TODO: Add logfile handling
+    // Add spaces after commas for better readability
+    jsonString = jsonString.replace(/,(?=\S)/g, ', ');
+    logMessage('formatJSON - Spaces Added', ['Formatted JSON string with spaces.', jsonString]);
 
     return jsonString;
 }
 
-
 /**
  * Extracts the GitHub issues URL (bugs.url) from any version of the package JSON data.
+ *
  * @param {any} packageData - The package JSON data.
- * @returns {string | null} - The GitHub issues URL if found, or null if not found.
+ * @returns {string | null} The GitHub issues URL if found, or null if not found.
  */
-
 export function extractLastIssuesUrlFromJson(packageData: any): string | null {
-     // TODO: Add logfile handling
+    logMessage('extractLastIssuesUrlFromJson - Start', ['Extracting issues URL from package data.', `Package Data: ${JSON.stringify(packageData)}`]);
+
     const versions = packageData.versions;
     let lastIssuesUrl: string | null = null;
-     // TODO: Add logfile handling
 
-      // TODO: Add logfile handling
-    // Iterate through the versions object
+    // Iterate through versions to find the last issues URL
     for (const version in versions) {
         if (versions.hasOwnProperty(version)) {
             const versionData = versions[version];
             if (versionData.bugs && versionData.bugs.url) {
                 lastIssuesUrl = versionData.bugs.url;  // Update to the latest found bugs.url
+                logMessage('extractLastIssuesUrlFromJson - Issues URL Found', [`Found issues URL for version ${version}: ${lastIssuesUrl}`, 'Continuing to check for more versions.']);
             }
         }
     }
-     // TODO: Add logfile handling
 
-     // TODO: Add logfile handling
     if (lastIssuesUrl) {
-        // TODO: Add logfile handling
+        logMessage('extractLastIssuesUrlFromJson - URL Found', ['Returning last found issues URL.', `URL: ${lastIssuesUrl}`]);
         return lastIssuesUrl;
     } else {
-        // TODO: Add logfile handling
-        console.warn('No GitHub issues URL found in any version.');
-        // TODO: Add logfile handling
+        logMessage('extractLastIssuesUrlFromJson - No URL Found', ['No GitHub issues URL found in any version.', 'Returning null.']);
         return null;
     }
-     // TODO: Add logfile handling
 }
-
-// Sample Calls
-// /**
-//  * Main function to demonstrate the creation and formatting of a DataObject.
-//  */
-// function main() {
-//     // Initialize an empty DataObject
-//     const data: DataObject = initJSON();
-    
-//     // Format the DataObject into a single-line JSON string with spaces
-//     const flattenedJson: string = formatJSON(data);
-    
-//     // Print the result
-//     console.log(flattenedJson);
-// }
-
-// // Call the main function to run the example
-// main();
