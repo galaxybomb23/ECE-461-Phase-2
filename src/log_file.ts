@@ -32,7 +32,6 @@ export function logMessage(component: string, messages: string[]) {
 
     let log_message: string;
     let type: string;
-    console.log(env_logLevel);
 
     if(env_logLevel  === 1){
         log_message = messages[0];  // Set message to Info message
@@ -53,7 +52,7 @@ export function logMessage(component: string, messages: string[]) {
 // Sample Calls
 
 // // Example of logging an INFO message
-// logMessage('Database', ['Connection established successfully.', 'Connecting to the database...']);
+// logMessage('Database Connection', ['Connection established successfully.', 'Connecting to the database...']);
 
 // // Example of logging a DEBUG message
 // logMessage('UserService', ['User details fetched.', 'Fetching user details for user ID: 123']);

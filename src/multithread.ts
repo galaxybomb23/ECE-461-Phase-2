@@ -1,8 +1,12 @@
 import { cpus } from 'os';
+import { logMessage } from './log_file';
 
 export function getNumberOfCores(): number {
-    // TODO: Add logfile handling
+    logMessage('getNumberOfCores', ['Determining the number of CPU cores.', 'Starting to fetch CPU core count.']);
+    
     const cores = cpus().length;
-    // TODO: Add logfile handling
+
+    logMessage('getNumberOfCores', [`Number of CPU cores: ${cores}`, 'Returning the core count.']);
+    
     return cores;
 }
