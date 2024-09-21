@@ -13,6 +13,10 @@ install_tasks() {
     tsc index.ts
 }
 
+test_tasks() {
+    
+}
+
 # Function to process the URL_FILE
 process_url_file() {
     local url_file="$1"
@@ -37,6 +41,8 @@ fi
 # Check if the argument is "install" or a URL_FILE
 if [ "$1" = "install" ]; then
     install_tasks
+elif ["$1" = "test"]; then
+    test_tasks
 else
     run_project "$1"  # Pass the argument to run_project
 fi
