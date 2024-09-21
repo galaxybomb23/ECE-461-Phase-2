@@ -1,19 +1,48 @@
 #!/bin/bash
 
-# Function to perform install tasks
-install_tasks() {
-    
-    npm install
+# Function to install npm packages
+install_npm_packages() {
+    # Attempt to install npm packages
+    if ! npm install; then
+        echo "npm install failed"
+        exit 1
+    fi
+    # Install the latest version of axios
     npm install axios@latest
-    tsc index.ts
-    # Initialize a .env file
-    # Create github token line
-    # Create log level line
-    # Create log file line
+    # Compile TypeScript files
+    tsc src/index.ts
 }
 
-test_tasks() {
-    echo "HI"
+# Function to set up environment files
+setup_environment_files() {
+    # Create .env file if it doesn't exist
+    if [ ! -f .env ]; then
+        touch .env
+    fi
+
+    # Add GITHUB_TOKEN if not already present
+    if ! grep -q "GITHUB_TOKEN=" .env; then
+        echo "GITHUB_TOKEN=" >> .env
+    fi
+
+    # Add LOG_LEVEL if not already present
+    if ! grep -q "LOG_LEVEL=" .env; then
+        echo "LOG_LEVEL=info" >> .env
+    fi
+
+    # Add LOG_FILE if not already present
+    if ! grep -q "LOG_FILE=" .env; then
+        echo "LOG_FILE=app.log" >> .env
+    fi
+}
+
+# Function to delete npm packages and related files
+delete_npm_packages() {
+    # Remove all JavaScript files and contents of dist directory
+    find . -type f -name "*.js" -exec rm -f {} +
+    find dist -mindepth 1 -delete
+    # Remove node_modules directory
+    rm -rf node_modules
 }
 
 # Function to process the URL_FILE
@@ -24,26 +53,69 @@ process_url_file() {
 
 # Function to run the project
 run_project() {
-    if [ -f "index.js" ]; then
-        node index.js "$1"
+    # Check if compiled JavaScript file exists
+    if [ -f "src/index.js" ]; then
+        node src/index.js "$1"
     else
-        tsc index.ts && node index.js "$1"
+        # Compile TypeScript and run the project
+        if tsc src/index.ts; then
+            node src/index.js "$1"
+        else
+            echo "TypeScript compilation failed."
+            exit 1
+        fi
     fi
 }
 
+# Function to run tests
+run_tests() {
+    echo "Running tests..."
+    # Add your test commands here
+    # For example: npm test or any specific test command
+    npm test
+}
+
+# Main script execution
+
 # Check for exactly 1 argument
 if [ "$#" -ne 1 ]; then
-    echo "Error: Exactly 1 argument is required."
+    echo "Usage: $0 <install|URL_FILE|test>"
     exit 1
 fi
 
-# Check if the argument is "install" or a URL_FILE
+# Check if the argument is "install"
 if [ "$1" = "install" ]; then
-    install_tasks
-elif ["$1" = "test"]; then
-    test_tasks
+    install_npm_packages
+    setup_environment_files
+    tsc src/index.ts
+
+# Check if the argument is "test"
+elif [ "$1" = "test" ]; then
+    run_tests
+
+# Otherwise, treat it as a URL_FILE
 else
-    run_project "$1"  # Pass the argument to run_project
+    run_project "$1"
+    if [ $? -ne 0 ]; then
+        # Check for module not found error
+        if grep -q "Cannot find module" <<< "$(node src/index.js "$1" 2>&1)"; then
+            while true; do
+                echo "Module not found. Would you like to refresh the packages? (Y/n)"
+                read -r response
+                if [ "$response" = "Y" ]; then
+                    delete_npm_packages
+                    install_npm_packages
+                    setup_environment_files
+                    run_project "$1"
+                    break
+                elif [ "$response" = "n" ]; then
+                    exit 1
+                else
+                    echo "Invalid response. Please enter 'Y' or 'n'."
+                fi
+            done
+        fi
+    fi
 fi
 
 exit 0

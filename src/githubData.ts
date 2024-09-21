@@ -1,9 +1,9 @@
 import * as sqlite3 from 'sqlite3';
 import axios from 'axios';
 import { fetchJsonFromApi } from "./API";
-import { url_type } from './url';
+import { url_type } from './URL';
 import { extractLastIssuesUrlFromJson } from './json';
-import { logMessage } from './log_file';
+import { logMessage } from './logFile';
 
 /**
  * Generates a GitHub API URL based on the provided repository URL and endpoint.
@@ -13,24 +13,23 @@ import { logMessage } from './log_file';
  * @returns {string} The GitHub API URL for the specified endpoint.
  */
 export function getGitHubAPILink(url: string, endpoint: string = ''): string {
-    // Split the URL to extract the repository owner and name.
     logMessage('getGitHubAPILink - Initializing', [
         'Starting to generate GitHub API URL.',
         `Received URL: ${url}, Endpoint: ${endpoint}`
     ]);
-    
+
     let urlParts = url.split('/');  // Split link into parts
     logMessage('getGitHubAPILink - URL Split', [
         'Successfully split the URL into parts.',
         `URL Parts: ${JSON.stringify(urlParts)}`
     ]);
-    
+
     let owner = urlParts[urlParts.length - 2];  // Isolate owner
     logMessage('getGitHubAPILink - Owner Extracted', [
         'Extracted repository owner.',
         `Owner: ${owner}`
     ]);
-    
+
     let repo = urlParts[urlParts.length - 1];   // Isolate repository name
     logMessage('getGitHubAPILink - Repository Extracted', [
         'Extracted repository name.',
@@ -66,12 +65,11 @@ export function getGitHubAPILink(url: string, endpoint: string = ''): string {
  * @returns {number[]} An array of contribution counts, one for each contributor.
  */
 export function getContributionCounts(data: any[]): number[] {
-    // Initialize an empty array to store contribution counts.
     logMessage('getContributionCounts - Initialization', [
         'Starting to extract contribution counts from API response data.',
         `Received data length: ${data.length}`
     ]);
-    
+
     let contributionCounts: number[] = [];
 
     // Iterate over each item in the response data.
@@ -101,13 +99,12 @@ export function getContributionCounts(data: any[]): number[] {
         `Final contribution counts: ${JSON.stringify(contributionCounts)}`
     ]);
 
-    // Return the array of contribution counts.
-    return contributionCounts;
+    return contributionCounts; // Return the array of contribution counts.
 }
-
 
 /**
  * Fetches the number of open issues for a given GitHub repository.
+ *
  * @param {string} owner - The GitHub owner of the repository.
  * @param {string} repo - The name of the repository.
  * @returns {Promise<number>} - The number of open issues.
@@ -176,7 +173,6 @@ async function fetchOpenIssuesCount(owner: string, repo: string): Promise<number
                 'Incrementing page count for the next request.',
                 `Next page will be: ${page}`
             ]);
-
         } catch (error) {
             logMessage('fetchOpenIssuesCount - API Error', [
                 'Error occurred while fetching open issues.',
@@ -195,9 +191,13 @@ async function fetchOpenIssuesCount(owner: string, repo: string): Promise<number
     return totalOpenIssues;
 }
 
-
-
-//closed
+/**
+ * Fetches the number of closed issues for a given GitHub repository.
+ *
+ * @param {string} owner - The GitHub owner of the repository.
+ * @param {string} repo - The name of the repository.
+ * @returns {Promise<number>} - The number of closed issues.
+ */
 async function fetchClosedIssuesCount(owner: string, repo: string): Promise<number> {
     logMessage('fetchClosedIssuesCount - Initialization', [
         'Starting to fetch closed issues count for the repository.',
@@ -248,7 +248,7 @@ async function fetchClosedIssuesCount(owner: string, repo: string): Promise<numb
             issuesOnPage = response.data.length; // Number of closed issues on this page
             logMessage('fetchClosedIssuesCount - Issues Count on Page', [
                 'Count of closed issues on the current page.',
-                `Closed issues on page ${page}: ${issuesOnPage}`
+                `Issues on page ${page}: ${issuesOnPage}`
             ]);
 
             totalClosedIssues += issuesOnPage;
@@ -262,7 +262,6 @@ async function fetchClosedIssuesCount(owner: string, repo: string): Promise<numb
                 'Incrementing page count for the next request.',
                 `Next page will be: ${page}`
             ]);
-
         } catch (error) {
             logMessage('fetchClosedIssuesCount - API Error', [
                 'Error occurred while fetching closed issues.',
@@ -279,136 +278,4 @@ async function fetchClosedIssuesCount(owner: string, repo: string): Promise<numb
     ]);
     
     return totalClosedIssues;
-}
-
-//end helper
-
-
-export async function getIssuesCount(url: string, packageData: any): Promise<{ openIssuesCount: number, closedIssuesCount: number }> {
-    logMessage('getIssuesCount - Start', [
-        'Beginning to fetch issue counts for the provided URL.',
-        `URL: ${url}`
-    ]);
-
-    const URL_type = url_type(url); // Check if the URL is GitHub or npmjs
-    logMessage('getIssuesCount - URL Type', [
-        'Determining the type of the provided URL.',
-        `Detected URL type: ${URL_type}`
-    ]);
-
-    let openIssuesCount = 0;
-    logMessage('getIssuesCount - Open Issues Count Initialization', [
-        'Initializing open issues count.',
-        `Initial open issues count: ${openIssuesCount}`
-    ]);
-
-    let closedIssuesCount = 0;
-    logMessage('getIssuesCount - Closed Issues Count Initialization', [
-        'Initializing closed issues count.',
-        `Initial closed issues count: ${closedIssuesCount}`
-    ]);
-
-    if (URL_type === 'npmjs') {
-        logMessage('getIssuesCount - NPMJS URL Detected', [
-            'Fetching issues from npmjs using API.',
-            'Proceeding to extract issues URL from package data.'
-        ]);
-
-        const issuesUrl = extractLastIssuesUrlFromJson(packageData); // Assuming packageData contains the issues URL
-        logMessage('getIssuesCount - Issues URL Extraction', [
-            'Extracted issues URL from package data.',
-            `Issues URL: ${issuesUrl}`
-        ]);
-
-        if (issuesUrl) {
-            const { owner, repo } = extractRepoFromIssuesUrl(issuesUrl); // Extract GitHub repo details
-            logMessage('getIssuesCount - Repo Extraction', [
-                'Extracting owner and repo from issues URL.',
-                `Owner: ${owner}, Repo: ${repo}`
-            ]);
-
-            openIssuesCount = await fetchOpenIssuesCount(owner, repo);
-            logMessage('getIssuesCount - Open Issues Count Update', [
-                'Fetched open issues count from GitHub.',
-                `Open issues count: ${openIssuesCount}`
-            ]);
-
-            closedIssuesCount = await fetchClosedIssuesCount(owner, repo);
-            logMessage('getIssuesCount - Closed Issues Count Update', [
-                'Fetched closed issues count from GitHub.',
-                `Closed issues count: ${closedIssuesCount}`
-            ]);
-        }
-
-    } else if (URL_type === 'github') {
-        logMessage('getIssuesCount - GitHub URL Detected', [
-            'Extracting open and closed issues from GitHub package data.'
-        ]);
-
-        openIssuesCount = packageData.open_issues_count || 0; // Extract open issues from the JSON
-        logMessage('getIssuesCount - Open Issues Count from Package Data', [
-            'Extracted open issues count from package data.',
-            `Open issues count: ${openIssuesCount}`
-        ]);
-
-        closedIssuesCount = packageData.closed_issues_count || 0; // Extract closed issues from the JSON
-        logMessage('getIssuesCount - Closed Issues Count from Package Data', [
-            'Extracted closed issues count from package data.',
-            `Closed issues count: ${closedIssuesCount}`
-        ]);
-    } else {
-        logMessage('getIssuesCount - Invalid URL Type', [
-            'Invalid URL type encountered.',
-            'Only GitHub or npmjs URLs are supported.'
-        ]);
-        throw new Error('Invalid URL type. Only GitHub or npmjs URLs are supported.');
-    }
-
-    logMessage('getIssuesCount - Result', [
-        'Returning the issue counts.',
-        `Open Issues: ${openIssuesCount}, Closed Issues: ${closedIssuesCount}`
-    ]);
-
-    return { openIssuesCount, closedIssuesCount };
-}
-
-function extractRepoFromIssuesUrl(url: string): { owner: string, repo: string } {
-    logMessage('extractRepoFromIssuesUrl - Start', [
-        'Extracting owner and repository name from the provided issues URL.',
-        `URL: ${url}`
-    ]);
-
-    const regex = /github\.com\/([^/]+)\/([^/]+)/;
-    logMessage('extractRepoFromIssuesUrl - Regex Defined', [
-        'Defining regex pattern to match GitHub owner and repo.',
-        `Regex: ${regex}`
-    ]);
-
-    const match = url.match(regex);
-    logMessage('extractRepoFromIssuesUrl - URL Matching', [
-        'Matching the URL against the regex pattern.',
-        `Match result: ${match ? match.join(', ') : 'No match found'}`
-    ]);
-
-    if (match && match.length >= 3) {
-        const owner = match[1];
-        logMessage('extractRepoFromIssuesUrl - Owner Extracted', [
-            'Successfully extracted the owner from the URL.',
-            `Owner: ${owner}`
-        ]);
-
-        const repo = match[2];
-        logMessage('extractRepoFromIssuesUrl - Repo Extracted', [
-            'Successfully extracted the repository name from the URL.',
-            `Repo: ${repo}`
-        ]);
-
-        return { owner, repo };
-    } else {
-        logMessage('extractRepoFromIssuesUrl - Invalid URL Error', [
-            'No valid owner and repository found in the URL.',
-            'Throwing an error for invalid GitHub issues URL.'
-        ]);
-        throw new Error('Invalid GitHub issues URL');
-    }
 }

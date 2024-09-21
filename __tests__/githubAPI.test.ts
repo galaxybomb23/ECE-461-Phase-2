@@ -1,4 +1,4 @@
-import { getContributionCounts, getGitHubAPILink } from '../src/github_data';
+import { getContributionCounts, getGitHubAPILink } from '../src/githubData';
 import { fetchJsonFromApi } from '../src/API';
 
 jest.mock('../src/API', () => ({

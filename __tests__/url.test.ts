@@ -1,4 +1,4 @@
-import { url_type, test_url, parse_urls } from "../src/url";
+import { url_type, test_url, parse_urls } from "../src/URL";
 import * as fs from 'fs';
 import { exit } from 'process';
 

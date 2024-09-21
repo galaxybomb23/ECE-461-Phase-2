@@ -1,14 +1,19 @@
 import { exit } from "process";
-import { get_valid_urls, url_type } from "./url";
+import { get_valid_urls, url_type } from "./URL";
 import { get_metrics } from "./metrics/getMetrics";
-import { logMessage } from './log_file';
+import { logMessage } from './logFile';
 
+/**
+ * Main function to process command line arguments, fetch valid URLs,
+ * gather metrics for each valid URL, and output the results.
+ */
 async function main() {
     logMessage('main - Start', ['Starting the main function.', 'Processing command line arguments.']);
     let args = process.argv.slice(2);
     logMessage('main - Arguments', [`Arguments received: ${JSON.stringify(args)}`, 'Checking if the number of arguments is correct.']);
 
-    if (args.length !== 1) { // Check for invalid number of arguments
+    // Check for invalid number of arguments
+    if (args.length !== 1) {
         logMessage('main - Invalid Arguments', ['Invalid number of arguments provided.', `Arguments length: ${args.length}`]);
         exit(1);
     }
@@ -28,7 +33,6 @@ async function main() {
         logMessage('main - Metrics Retrieved', [`Metrics retrieved for URL: ${valid_urls[i]}`, 'Storing metrics in repository stats.']);
     }
 
-
     for (let i = 0; i < repo_stats.length; i++) {
         logMessage('main - Outputting Stats', [`Outputting stats for repository: ${repo_stats[i]}`, 'Printing metrics to console.']);
         console.log(repo_stats[i]);
@@ -37,4 +41,5 @@ async function main() {
     logMessage('main - End', ['Main function completed successfully.', 'Exiting the application.']);
 }
 
+// Execute the main function
 main();

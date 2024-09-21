@@ -1,25 +1,24 @@
-import { logMessage } from "./log_file";
+import { logMessage } from "./logFile";
 
 /**
  * Interface representing a data object used for storing repository metrics.
  * 
  * @interface DataObject
- * @typedef {DataObject}
  */
 interface DataObject {
-    URL: string;
-    NetScore: number | null;
-    NetScore_Latency: number | null;
-    RampUp: number | null;
-    RampUp_Latency: number | null;
-    Correctness: number | null;
-    Correctness_Latency: number | null;
-    BusFactor: number | null;
-    BusFactor_Latency: number | null;
-    ResponsiveMaintainer: number | null;
-    ResponsiveMaintainer_Latency: number | null;
-    License: number | null;
-    License_Latency: number | null;
+    URL: string;                                    // The URL of the repository
+    NetScore: number | null;                        // Overall net score of the repository
+    NetScore_Latency: number | null;                // Latency for net score
+    RampUp: number | null;                          // Ramp-up metric
+    RampUp_Latency: number | null;                  // Latency for ramp-up metric
+    Correctness: number | null;                     // Correctness metric
+    Correctness_Latency: number | null;             // Latency for correctness metric
+    BusFactor: number | null;                       // Bus factor metric
+    BusFactor_Latency: number | null;               // Latency for bus factor metric
+    ResponsiveMaintainer: number | null;            // Responsive maintainer score
+    ResponsiveMaintainer_Latency: number | null;    // Latency for responsive maintainer score
+    License: number | null;                         // License metric
+    License_Latency: number | null;                 // Latency for license metric
 }
 
 /**
@@ -62,6 +61,7 @@ export function formatJSON(data: DataObject): string {
     let jsonString = JSON.stringify(data);
     logMessage('formatJSON - JSON String Created', ['Initial JSON string created.', jsonString]);
 
+    // Add spaces after commas for better readability
     jsonString = jsonString.replace(/,(?=\S)/g, ', ');
     logMessage('formatJSON - Spaces Added', ['Formatted JSON string with spaces.', jsonString]);
 
@@ -70,8 +70,9 @@ export function formatJSON(data: DataObject): string {
 
 /**
  * Extracts the GitHub issues URL (bugs.url) from any version of the package JSON data.
+ *
  * @param {any} packageData - The package JSON data.
- * @returns {string | null} - The GitHub issues URL if found, or null if not found.
+ * @returns {string | null} The GitHub issues URL if found, or null if not found.
  */
 export function extractLastIssuesUrlFromJson(packageData: any): string | null {
     logMessage('extractLastIssuesUrlFromJson - Start', ['Extracting issues URL from package data.', `Package Data: ${JSON.stringify(packageData)}`]);
@@ -79,6 +80,7 @@ export function extractLastIssuesUrlFromJson(packageData: any): string | null {
     const versions = packageData.versions;
     let lastIssuesUrl: string | null = null;
 
+    // Iterate through versions to find the last issues URL
     for (const version in versions) {
         if (versions.hasOwnProperty(version)) {
             const versionData = versions[version];
@@ -97,14 +99,3 @@ export function extractLastIssuesUrlFromJson(packageData: any): string | null {
         return null;
     }
 }
-
-// Sample Calls
-// /**
-//  * Main function to demonstrate the creation and formatting of a DataObject.
-//  */
-// function main() {
-//     const data: DataObject = initJSON();
-//     const flattenedJson: string = formatJSON(data);
-//     console.log(flattenedJson);
-// }
-// main();
