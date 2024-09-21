@@ -1,23 +1,66 @@
-import axios from 'axios';
-//maintener
+import { getGitHubAPILink } from '../github_data';
+import { fetchJsonFromApi } from '../API';
+import { getTimestampWithThreeDecimalPlaces } from './getLatency';
 
 /**
  * Calculates the Responsive Maintainer score based on the recency of updates.
  * If the package has been updated within the last 6 months, give a higher score.
- * @param {any} packageData - The npm package data.
- * @param {string} fetchLatency - The latency of fetching the npm data.
- * @returns {number} The Responsive Maintainer score (0-1).
+ * @param {string} URL - The GitHub repository URL.
+ * @returns {Promise<{ score: number; latency: number }>} The Responsive Maintainer score (0-1) and fetch latency.
  */
-export function calculateResponsiveMaintainer (openIssuesCount: number, closedIssuesCount: number,  fetchLatency: string): { score: number, latency: string } {
-    const start = Date.now(); // Start timing
+export async function calculateResponsiveMaintainer(URL: string): Promise<{ score: number, latency: number }> {
+     // TODO: Add logfile handling
+    const latency_start = getTimestampWithThreeDecimalPlaces();
+     // TODO: Add logfile handling
 
- 
+      // TODO: Add logfile handling
+    const API_link = getGitHubAPILink(URL);
+     // TODO: Add logfile handling
 
-    const ratio = openIssuesCount / closedIssuesCount;
-    const score = 1 / (1+ ratio);
-    const latencyMs = Date.now() - start; // Calculate latency in milliseconds
-    const totalLatencySec = ((latencyMs + Number(fetchLatency) * 1000) / 1000).toFixed(3); // Add fetchLatency and round
-    return { score, latency: totalLatencySec };
+      // TODO: Add logfile handling
+    // Fetch repository data and issues data in one call
+    const [repoData, issuesData] = await Promise.all([
+        fetchJsonFromApi(API_link),
+        fetchJsonFromApi(`${API_link}/issues?state=all`)
+    ]);
+     // TODO: Add logfile handling
+
+      // TODO: Add logfile handling
+    let openIssuesCount = 0;
+    let closedIssuesCount = 0;
+    
+    for (const issue of issuesData) {
+        if (issue.closed_at) {
+            closedIssuesCount++;
+        } else {
+            openIssuesCount++;
+        }
+    }
+     // TODO: Add logfile handling
+
+      // TODO: Add logfile handling
+    // If open_issues_count from repoData is available, use it
+    openIssuesCount = repoData.open_issues_count || openIssuesCount;
+     // TODO: Add logfile handling
+
+      // TODO: Add logfile handling
+    const ratio = closedIssuesCount > 0 ? openIssuesCount / closedIssuesCount : 0; // Avoid division by zero
+    const score = parseFloat((1 / (1 + ratio)).toFixed(2));
+     // TODO: Add logfile handling
+
+      // TODO: Add logfile handling
+    // Calculate latency in milliseconds
+    const latencyMs = parseFloat((getTimestampWithThreeDecimalPlaces() - latency_start).toFixed(2));
+     // TODO: Add logfile handling
+
+    return { score, latency: latencyMs };
 }
 
-//maintainer
+// // Sample Call
+// async function main() {
+//     const url = 'https://github.com/lodash/lodash'; // Replace with your desired URL
+//     const { score, latency } = await calculateResponsiveMaintainer(url); // Calculate Responsive Maintainer score and latency
+//     console.log(`Responsive Maintainer Score: ${score}`);
+//     console.log(`Fetch Latency: ${latency} seconds`);
+// }
+// main();

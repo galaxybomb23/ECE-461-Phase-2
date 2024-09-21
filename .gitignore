@@ -26,3 +26,6 @@ Thumbs.db
 
 # Environment File
 .env
+
+# Ignore vscode Directory
+.vscode/

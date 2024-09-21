@@ -1,78 +1,61 @@
 import axios from 'axios';
- import * as fs from 'fs';
-
- function calculateRampUp(packageData: any, fetchLatency: string): { score: number, latency: string } {
-    const start = Date.now(); // Start timing
-
-
-    const MAX_SIZE = 5000000; // Arbitrary maximum package size
-    let size = 0;
-
-    // Check if unpackedSize is available under the latest version
-    const latestVersion = packageData['dist-tags']?.latest;
-    const latestVersionData = packageData.versions?.[latestVersion];
-
-   
-
-    if (latestVersionData && latestVersionData.dist && latestVersionData.dist.unpackedSize) {
-        size = latestVersionData.dist.unpackedSize;
-    } else {
-        console.warn('Package size information not available. Using default size of 0.');
-    }
-
-    // Calculate score based on size (the smaller the package, the higher the score)
-    const score = 1 - Math.min(size / MAX_SIZE, 1); // Ensure score is between 0 and 1
-    const latencyMs = Date.now() - start; // Calculate latency in milliseconds
-    const totalLatencySec = ((latencyMs + Number(fetchLatency) * 1000) / 1000).toFixed(3); // Add fetchLatency and round
-
-    return { score, latency: totalLatencySec };
-}
-
+import { getGitHubAPILink } from '../github_data';
+import { fetchJsonFromApi } from '../API';
+import { getTimestampWithThreeDecimalPlaces } from './getLatency';
 
 /**
- * Calculates the RampUp score for GitHub repositories.
+ * Calculates the RampUp score and fetch latency for GitHub repositories.
  * The smaller the repository size, the higher the score.
  * 
- * @param {any} packageData - The fetched GitHub repository data.
- * @param {string} fetchLatency - The latency in fetching the data.
- * @returns {{ score: number, latency: string }} - The RampUp score and latency.
+ * @param {string} repoURL - The GitHub repository URL.
+ * @returns {Promise<{ score: number, latency: number }>} The RampUp score and latency.
  */
-function calculateRampUpFromGitHub(packageData: any, fetchLatency: string): { score: number, latency: string } {
-    const start = Date.now(); // Start timing
+export async function calculateRampUp(repoURL: string): Promise<{ score: number, latency: number }> {
+     // TODO: Add logfile handling
+    const latency_start = getTimestampWithThreeDecimalPlaces();
+    const MAX_SIZE_KB = 50000; // Arbitrary maximum repository size in KB (50MB)
+     // TODO: Add logfile handling
 
-    const MAX_SIZE_KB = 50000; // Arbitrary maximum repo size in KB (50MB)
-    let sizeInKb = packageData.size || 0; // Repo size in KB
+      // TODO: Add logfile handling
+    // GitHub API URL for repository information
+    const apiLink = getGitHubAPILink(repoURL);
+     // TODO: Add logfile handling
 
-    if (!sizeInKb) {
-        console.warn('GitHub repository size information not available. Using default size of 0.');
+      // TODO: Add logfile handling
+    // Fetch repository data from GitHub
+    let repoData;
+    try {
+        repoData = await fetchJsonFromApi(apiLink);
+    } catch (error) {
+        throw new Error('Error fetching repository data from GitHub');
     }
+     // TODO: Add logfile handling
 
-    // Calculate the score based on repository size
-    const score = 1 - Math.min(sizeInKb / MAX_SIZE_KB, 1); // Score is inversely proportional to the repo size
+      // TODO: Add logfile handling
+    // Calculate repo size in KB
+    const sizeInKb = repoData.size || 0;
+    if (sizeInKb <= 0) {
+        console.warn('GitHub repository size information not available or invalid. Using default size of 0.');
+    }
+     // TODO: Add logfile handling
 
-    const latencyMs = Date.now() - start; // Calculate latency in milliseconds
-    const totalLatencySec = ((latencyMs + Number(fetchLatency) * 1000) / 1000).toFixed(3); // Add fetchLatency and round
+     // TODO: Add logfile handling
+    // Calculate the RampUp score
+    const score = parseFloat((1 - Math.min(sizeInKb / MAX_SIZE_KB, 1)).toFixed(1)); // Ensure score is between 0 and 1
+     // TODO: Add logfile handling
 
-    return { score, latency: totalLatencySec };
+      // TODO: Add logfile handling
+    // Calculate latency in milliseconds
+    const latencyMs = parseFloat((getTimestampWithThreeDecimalPlaces() - latency_start).toFixed(2));
+     // TODO: Add logfile handling
+    return { score, latency: latencyMs }; // Return score and latency in a readable format
 }
 
-
-
-/**
- * Main function to calculate RampUp score based on the package type (GitHub or npmjs).
- * 
- * @param {any} packageData - The fetched package data (either from npmjs or GitHub).
- * @param {string} fetchLatency - The latency in fetching the data.
- * @param {string} type - The type of package ('github' or 'npmjs').
- * @returns {{ score: number, latency: string }} - The RampUp score and latency.
- */
-export function calculateRampUpMain(packageData: any, fetchLatency: string, type: string): { score: number, latency: string } {
-    if (type === 'npmjs') {
-        return calculateRampUpFromGitHub(packageData, fetchLatency); // Use npmjs RampUp calculation
-    } else if (type === 'github') {
-        return calculateRampUpFromGitHub(packageData, fetchLatency); // Use GitHub RampUp calculation
-    } else {
-        throw new Error('Invalid package type. Only "npmjs" or "github" are supported.');
-    }
-}
-//end RAMP
+// Sample Call
+// async function main() {
+//     const repoURL = 'https://github.com/lodash/lodash'; // Replace with the desired GitHub repository URL
+//     const { score, latency } = await calculateRampUp(repoURL); // Calculate RampUp score and latency
+//     console.log(`RampUp Score: ${score}`);
+//     console.log(`Fetch Latency: ${latency}`);
+// }
+// main();

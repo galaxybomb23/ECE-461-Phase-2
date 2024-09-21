@@ -8,7 +8,12 @@ test_url:
 testall:
 	@make test_url
 
-refresh_node:
+test:
+	@ tsc src/index.ts && node src/index.js /home/miller/mknotes/ECE/461/Project/__tests__/data/sample_urls.txt
+
+refresh:
+	@find . -type f -name "*.js" -exec rm -f {} +
+	@find dist -mindepth 1 -delete
 	@rm -rf node_modules
 	@npm install
 	@npm install axios@latest
