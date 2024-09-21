@@ -2,19 +2,14 @@
 
 # Function to perform install tasks
 install_tasks() {
-    # echo "Running install tasks..."
     
-    # npm install --save-dev @types/node
-    # npm install sync-request
-    # sudo npm install -g ts-node
-
-    # npm install @octokit/rest
-
+    npm install
+    npm install axios@latest
     tsc index.ts
 }
 
 test_tasks() {
-    
+    echo "HI"
 }
 
 # Function to process the URL_FILE

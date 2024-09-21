@@ -62,6 +62,36 @@ export function formatJSON(data: DataObject): string {
     return jsonString;
 }
 
+
+/**
+ * Extracts the GitHub issues URL (bugs.url) from any version of the package JSON data.
+ * @param {any} packageData - The package JSON data.
+ * @returns {string | null} - The GitHub issues URL if found, or null if not found.
+ */
+
+export function extractLastIssuesUrlFromJson(packageData: any): string | null {
+    const versions = packageData.versions;
+    let lastIssuesUrl: string | null = null;
+
+    // Iterate through the versions object
+    for (const version in versions) {
+        if (versions.hasOwnProperty(version)) {
+            const versionData = versions[version];
+            if (versionData.bugs && versionData.bugs.url) {
+                lastIssuesUrl = versionData.bugs.url;  // Update to the latest found bugs.url
+            }
+        }
+    }
+
+    if (lastIssuesUrl) {
+    
+        return lastIssuesUrl;
+    } else {
+        console.warn('No GitHub issues URL found in any version.');
+        return null;
+    }
+}
+
 // Sample Calls
 // /**
 //  * Main function to demonstrate the creation and formatting of a DataObject.

@@ -51,6 +51,7 @@ export function url_type(url: string): string {
 export function parse_urls(filename: string): string[] {
     // Exit 1 (for error) if file does not exist
     if (!fs.existsSync(filename)) {
+        // Add log
       exit(1);
     }
   
@@ -62,4 +63,35 @@ export function parse_urls(filename: string): string[] {
     }
   
     return file_content.split('\n'); // Return array of URLs
+}
+
+
+export async function get_valid_urls(filename: string): Promise<string[]> {
+    let args = process.argv.slice(2);
+
+    if (args.length != 1) {     // Check for invalid number of arguments
+        // TODO: Add log
+        exit(1);
+    }
+
+    
+    let url_array = parse_urls(filename);
+
+    let valid_urls = [];
+
+    for(let i = 0; i < url_array.length; i++){
+        try{
+            if(await test_url(url_array[i])){
+                valid_urls.push(url_array[i]);
+            }
+            else{
+                // Log that URL does not work
+            }
+        } catch (error) {
+            // Log error
+            exit(1);
+        }
+    }
+
+    return(valid_urls);
 }

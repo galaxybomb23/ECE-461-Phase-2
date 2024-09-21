@@ -1,88 +1,36 @@
-import { test_url, parse_urls } from "./src/url";
-import { initJSON } from "./src/json";
 import { exit } from "process";
-import {fetchJsonFromApi} from './src/API';
+import { get_valid_urls, url_type } from "./src/url";
+import { get_metrics } from "./src/metrics/getMetrics";
+import * as readline from 'readline';
+import { getNodeJsAPILink } from "./src/nodejs_data";
+import { formatJSON, initJSON } from "./src/json";
+import{ getTimestampWithThreeDecimalPlaces } from "./src/metrics/getLatency";
 
-/**
- * Parses URLs from the given filename and validates them.
- * 
- * @param {string} filename - The path to the file containing URLs.
- * @returns {Promise<string[]>} A promise that resolves to an array of trimmed URLs.
- */
-async function processUrls(filename: string): Promise<string[]> {
-    const urls = parse_urls(filename);
+async function main() {
+    let args = process.argv.slice(2);
 
-    if (urls.length === 0) {
-        console.error('URL file provided is empty.');
+    if (args.length != 1) {     // Check for invalid number of arguments
+        // TODO: Add log
         exit(1);
     }
 
-    return urls.map(url => url.trim()).filter(url => url !== ''); // Remove empty lines
-}
+    let filename = args[0];
 
-/**
- * Validates a single URL by testing if it exists.
- * 
- * @param {string} url - The URL to test.
- * @returns {Promise<boolean>} A promise that resolves to true if the URL exists, false otherwise.
- */
-async function validateUrl(url: string): Promise<boolean> {
-    try {
-        const exists = await test_url(url);
-        if (!exists) {
-            console.error('Invalid link:', url);
-            return false;
-        }
-        return true;
-    } catch (error) {
-        console.error('Error testing the URL:', error);
-        return false;
+    let valid_urls = await get_valid_urls(filename);
+
+    let repo_stats = [];
+    // Check if linke is NPM, convert to github
+    for (let i = 0; i < valid_urls.length; i++) {
+        
+        repo_stats.push(await get_metrics(valid_urls[i]));
     }
-}
-
-/**
- * Initializes and returns a repository JSON object with the provided URL.
- * 
- * @param {string} url - The URL to be added to the repository JSON object.
- * @returns {Object} The initialized JSON object with the URL.
- */
-function createRepoJson(url: string): object {
-    let repo_JSON = initJSON(); // Initialize JSON object
-    repo_JSON.URL = url; // Set the URL field
-    return repo_JSON;
-}
-
-/**
- * Main function to coordinate the parsing, validation, and processing of URLs.
- * 
- * @returns {Promise<void>} A promise that resolves when the script finishes execution.
- */
-async function main(): Promise<void> {
-    const args = process.argv.slice(2); // Get command-line arguments
-    if (args.length < 1) {
-        console.error("Usage: ./ run $URL_FILE");
-        exit(1);
+    for (let i = 0; i < repo_stats.length; i++) {
+        console.log(repo_stats[i]);
     }
-
-    const filename = args[0]; // The filename provided as a command-line argument
-
-    try {
-        const urls = await processUrls(filename);
-
-        for (const url of urls) {
-            const isValid = await validateUrl(url);
-            if (!isValid) {
-                exit(1); // Exit if any URL is invalid
-            }
-
-            const repoJson = createRepoJson(url);
-            // console.log(repoJson);   // To test output
-        }
-
-    } catch (error) {
-        console.error('Error processing URLs:', error);
-    }
+    // console.log(repo_stats);
 }
 
-// Call the main function
+
+
+
 main();

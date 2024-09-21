@@ -35,7 +35,7 @@ export async function getNodeJsAPILink(url: string): Promise<string> {
 
         if (repositoryUrl) {
             const httpsRepoUrl = convertGitUrlToHttps(repositoryUrl);
-            console.log('Clean GitHub Repository URL:', httpsRepoUrl);
+            // console.log('Clean GitHub Repository URL:', httpsRepoUrl);
             return httpsRepoUrl;  // Return the cleaned GitHub repository URL
         } else {
             console.error('No GitHub repository link found or data is incomplete.');

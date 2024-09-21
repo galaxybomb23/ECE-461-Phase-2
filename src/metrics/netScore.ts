@@ -1,3 +1,5 @@
+import { getTimestampWithThreeDecimalPlaces } from "./getLatency";
+
 /**
  * Calculates the net score based on various metrics.
  * 
@@ -12,7 +14,7 @@
  * @param {number} license - Calculated License Score
  * @returns {number} - The calculated net score.
  */
-export function getNetScore(ramp_up_time: number, correctness: number, bus_factor: number, responsive_maintainer: number, license: number): number {
+export async function getNetScore(ramp_up_time: number, correctness: number, bus_factor: number, responsive_maintainer: number, license: number): Promise<number> {
 
     // Initialize net score to zero
     let net_score = 0;
@@ -23,6 +25,21 @@ export function getNetScore(ramp_up_time: number, correctness: number, bus_facto
     net_score += (0.2) * correctness;   // Add weighted correctness score (20%)
     net_score += (0.1) * ramp_up_time;  // Add weighted Ramp-Up Time score (10%)
 
-    // Return the final calculated net score
-    return net_score;
+    net_score = parseFloat((net_score).toFixed(1));
+
+    return (net_score);
+}
+
+export async function getNetScoreLatency(
+    ramp_up_latency: number,
+    correctness_latency: number,
+    bus_factor_latency: number,
+    responsive_maintainer_latency: number,
+    license_latency: number
+): Promise<number> {
+    let netScore_Latency = ramp_up_latency + correctness_latency + bus_factor_latency + responsive_maintainer_latency + license_latency;
+
+    netScore_Latency = parseFloat((netScore_Latency).toFixed(1));
+    
+    return(netScore_Latency);
 }
