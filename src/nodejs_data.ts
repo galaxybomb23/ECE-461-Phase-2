@@ -17,33 +17,32 @@ function convertGitUrlToHttps(repoUrl: string): string {
     }
     return repoUrl;
 }
-
 /**
  * Gets the API link for the Node.js repository on GitHub.
  * @param {string} url - The URL of the npm package.
- * @returns {Promise<void>}
+ * @returns {Promise<string>}
  */
-export async function getNodeJsAPILink(url: string): Promise<void> {
+export async function getNodeJsAPILink(url: string): Promise<string> {
     let url_parts = url.split('/');
-
     let repo = url_parts[url_parts.length - 1];
-
-    let registry_url =  `https://registry.npmjs.org/${repo}`;
+    let registry_url = `https://registry.npmjs.org/${repo}`;
+    
     try {
         const data = await fetchJsonFromApi(registry_url);
 
         // Extract GitHub repository link from the npm package data
         const repositoryUrl = data?.repository?.url;
-        console.log('Repository URL from npm Data:', data);
+
         if (repositoryUrl) {
             const httpsRepoUrl = convertGitUrlToHttps(repositoryUrl);
             console.log('Clean GitHub Repository URL:', httpsRepoUrl);
+            return httpsRepoUrl;  // Return the cleaned GitHub repository URL
         } else {
             console.error('No GitHub repository link found or data is incomplete.');
+            return '';  // Return an empty string if no GitHub link is found
         }
-
-        // If there's a GitHub repo link, you can proceed to fetch further data from GitHub
     } catch (error) {
         console.error('Error fetching data from npm API:', error);
+        return '';  // Return an empty string in case of an error
     }
 }

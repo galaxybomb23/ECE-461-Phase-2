@@ -1,10 +1,12 @@
 import axios from 'axios';
 import * as fs from 'fs';
-import {fetchGithubRepoData} from './API';
+import {fetchGithubRepoData} from '../getRepoInfo';
 import { calculateCorrectness } from './correctness';
-import { calculateLicense } from './license';
+import { getLicence } from './license';
 import { calculateRampUpMain } from './rampUp';
 import { calculateResponsiveMaintainer } from './responsiveMaintainer';
+import { getNodeJsAPILink } from '../nodejs_data';
+
 
 // import { calculateNetScore } from './netScore'; //not yet
 
@@ -53,7 +55,13 @@ async function getJSON(url: string): Promise<any> {
             packageData = await fetchGithubRepoData(url); // Fetch data from GitHub
             return packageData;
         } else if (URL_type === 'npmjs') {
-            throw new Error('We Asume it needs a github'); // exit on 1 error
+            try {
+            const temp_link = await getNodeJsAPILink(url);
+            packageData = await fetchGithubRepoData(temp_link);}
+            catch{
+                console.log('link error');
+            }
+             // exit on 1 error
             return packageData;
          
         } else {
@@ -241,25 +249,28 @@ export async function getIssuesCount(url: string, packageData: any): Promise<{ o
         const start = Date.now();
         
         const  packageData  = await getJSON(npmPackageUrl); // Fetch data and fetch latency
-        // const metadataFilePath = './META.json';
-        // fs.writeFileSync(metadataFilePath, JSON.stringify(packageData, null, 2), 'utf-8');
-        //const { data: packageData, fetchLatency } = await fetchNpmPackageData(packageName!); // Fetch data and fetch latency
+        const metadataFilePath = './META.json';
+        fs.writeFileSync(metadataFilePath, JSON.stringify(packageData, null, 2), 'utf-8');
+   
         const pack_type = determineUrlType(npmPackageUrl);
          
 
 
-        const fetchLatencyp =Date.now() - start
+        const fetchLatencyp =Date.now() - start;
         const fetchLatency = (fetchLatencyp / 1000).toFixed(3); // Convert to seconds and round to 3 decimal places; 
         
         // Calculate metrics with total latency (including fetch latency)
         const rampUp = calculateRampUpMain(packageData, fetchLatency, pack_type);
-        const license = await calculateLicense(packageData, fetchLatency); 
+        const license =getLicence(packageData);
+        const licenselat =  Date.now() - start;
         
         
       
 
         const corec_time = Date.now();
-        const { openIssuesCount, closedIssuesCount } = await getIssuesCount(npmPackageUrl, packageData);
+        //const { openIssuesCount, closedIssuesCount } = await getIssuesCount(npmPackageUrl, packageData);
+        const openIssuesCount = packageData.open_issues_count || 0; // Extract open issues from the JSON
+        const closedIssuesCount = packageData.closed_issues_count || 0;
 
         
        
@@ -275,7 +286,7 @@ export async function getIssuesCount(url: string, packageData: any): Promise<{ o
         console.log(`Metrics for package: ${npmPackageUrl}`);
         console.log(`RampUp Score: ${rampUp.score.toFixed(2)} (Total Latency: ${rampUp.latency} seconds)`);
         console.log(`Correctness Score: ${correctness.score.toFixed(2)} (Total Latency: ${correctness.latency + latency_correct} seconds)`);
-        console.log(`License Score: ${license.score} (Total Latency: ${license.latency} seconds)`); // Use await before accessing properties
+        console.log(`License Score: ${license} (Total Latency: ${licenselat} seconds)`); // Use await before accessing properties
         console.log(`Responsive Maintainer Score: ${responsiveMaintainer.score} (Total Latency: ${responsiveMaintainer.latency} seconds)`);
     } catch (error) {
         console.error('Error processing package:', error);

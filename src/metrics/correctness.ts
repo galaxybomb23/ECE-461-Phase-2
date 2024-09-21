@@ -10,7 +10,6 @@ import axios from 'axios';
  */
 export function calculateCorrectness(openIssuesCount: number, fetchLatency: string): { score: number, latency: string } {
     const start = Date.now(); // Start timing
-    console.log(`open issues insideee: ${openIssuesCount}`);
 
     const MAX_ISSUES = 1000; // Define a maximum reasonable number of issues
     const score = 1 - Math.min(openIssuesCount / MAX_ISSUES, 1);

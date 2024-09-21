@@ -68,7 +68,7 @@ function calculateRampUpFromGitHub(packageData: any, fetchLatency: string): { sc
  */
 export function calculateRampUpMain(packageData: any, fetchLatency: string, type: string): { score: number, latency: string } {
     if (type === 'npmjs') {
-        return calculateRampUp(packageData, fetchLatency); // Use npmjs RampUp calculation
+        return calculateRampUpFromGitHub(packageData, fetchLatency); // Use npmjs RampUp calculation
     } else if (type === 'github') {
         return calculateRampUpFromGitHub(packageData, fetchLatency); // Use GitHub RampUp calculation
     } else {
