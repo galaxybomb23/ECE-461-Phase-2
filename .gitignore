@@ -29,3 +29,6 @@ Thumbs.db
 
 # Ignore vscode Directory
 .vscode/
+
+# Ignore Logfile
+logfile.log

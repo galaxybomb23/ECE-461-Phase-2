@@ -1,5 +1,6 @@
 import axios from 'axios';
 import * as dotenv from 'dotenv';
+import { logMessage } from './log_file';
 dotenv.config();
 
 /**
@@ -16,32 +17,60 @@ dotenv.config();
 export async function fetchJsonFromApi(apiLink: string): Promise<any> {
     // Get the token from environment variables
     const token = process.env.GITHUB_TOKEN;
-    // TODO: Add logfile handling
+    logMessage('fetchJsonFromApi - Start', [
+        'Preparing to fetch JSON data from the API.',
+        `API link: ${apiLink}`
+    ]);
 
     // Set up headers conditionally based on the presence of the token
     const headers: any = {
-        // TODO: Add logfile handling
         'Accept': 'application/vnd.github.v3+json',
     };
+    logMessage('fetchJsonFromApi - Setting Headers', [
+        'Setting headers for the API request.',
+        'Headers initialized with Accept type for GitHub API.'
+    ]);
 
-    // TODO: Add logfile handling
     if (token) {
-        // TODO: Add logfile handling
         headers['Authorization'] = `token ${token}`;
+        logMessage('fetchJsonFromApi - Authorization', [
+            'Authorization token added to headers.',
+            'Token present and attached to request headers.'
+        ]);
+    } else {
+        logMessage('fetchJsonFromApi - Authorization', [
+            'No authorization token found.',
+            'Proceeding without authorization token.'
+        ]);
     }
 
     try {
-        // TODO: Add logfile handling
+        logMessage('fetchJsonFromApi - Sending Request', [
+            'Sending GET request to the API.',
+            `Requesting data from: ${apiLink}`
+        ]);
         const response = await axios.get(apiLink, { headers });
-        // TODO: Add logfile handling
+        logMessage('fetchJsonFromApi - Response Received', [
+            'Successfully received data from the API.',
+            'Data successfully fetched and returned as JSON.'
+        ]);
         return response.data; // This returns the response as JSON
     } catch (error: any) {
-
-        // TODO: Add logfile handling
+        logMessage('fetchJsonFromApi - Error', [
+            'Error occurred during the API request.',
+            `Error message: ${error.message}`
+        ]);
 
         // Since we've already checked repository exists, no need to throw error
         // Just means lack of data
+        if (apiLink.includes('/license')) {
+            logMessage('fetchJsonFromApi - License Error', [
+                'Returning empty object due to error on the license endpoint.',
+                'No data found or the request failed.'
+            ]);
+            return {}; // Return empty dataset if no data can be retrieved
+        }
 
-        return {}; // Return empty dataset if no data can be retrieved
+        throw new Error(`API request failed: ${error.message}`);
     }
 }

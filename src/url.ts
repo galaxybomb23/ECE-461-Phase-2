@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import { exit } from 'process';
+import { logMessage } from './log_file';
 
 /**
  * Checks if a given URL is accessible by making a HEAD request.
@@ -12,10 +13,13 @@ import { exit } from 'process';
  * @returns {Promise<boolean>} - A promise that resolves to true if the URL is accessible, otherwise false.
  */
 export async function test_url(url: string): Promise<boolean> {
-    try {    // Try to connect to site, return true if the response is ok
+    try {
+        logMessage('test_url', ['Checking URL accessibility.', `Testing URL: ${url}`]);
         const response = await fetch(url, { method: 'HEAD' });
+        logMessage('test_url', ['URL accessibility check completed.', `Response OK: ${response.ok}`]);
         return response.ok;
-    } catch (error) {    // If unable to connect to site, return false
+    } catch (error) {
+        logMessage('test_url', ['Error while checking URL accessibility.', `Error: ${error}`]);
         return false;
     }
 }
@@ -30,18 +34,17 @@ export async function test_url(url: string): Promise<boolean> {
  * @returns {string} - Returns "github" for GitHub URLs, "npmjs" for npmJS URLs, or "other" if neither.
  */
 export function url_type(url: string): string {
-    // Define the regex pattern to match specific URLs
-    // TODO: Add logfile handling
+    logMessage('url_type', ['Determining URL type.', `Evaluating URL: ${url}`]);
+    
     let regex = new RegExp("(github|npmjs)\\.com", "i");
     let match = regex.exec(url);
     
-    // TODO: Add logfile handling
     if (match) {
-        // TODO: Add logfile handling
+        logMessage('url_type', ['Match found for URL type.', `Matched type: ${match[1]}`]);
         return match[1];  // Return the captured group (github or npmjs)
     }
 
-    // TODO: Add logfile handling
+    logMessage('url_type', ['No match found for URL type.', 'Returning "other".']);
     return "other"; // Return "other" if no match
 }
 
@@ -53,61 +56,50 @@ export function url_type(url: string): string {
  * @returns {string[] | number} An array of URLs if the file exists, or `0` if the file does not exist.
  */
 export function parse_urls(filename: string): string[] {
-    // Exit 1 (for error) if file does not exist
-    // TODO: Add logfile handling
     if (!fs.existsSync(filename)) {
-        // TODO: Add logfile handling
-      exit(1);
-    }
-    // TODO: Add logfile handling
-  
-    const file_content = fs.readFileSync(filename, 'utf-8'); // Read file content
-    // TODO: Add logfile handling
-  
-    // Return an empty array if the file content is empty
-    // TODO: Add logfile handling
-    if (!file_content) {
-        // TODO: Add logfile handling
-      return [];
-    }
-    // TODO: Add logfile handling
-  
-    return file_content.split('\n'); // Return array of URLs
-}
-
-
-export async function get_valid_urls(filename: string): Promise<string[]> {
-    // TODO: Add logfile handling
-    let args = process.argv.slice(2);
-
-    if (args.length != 1) {     // Check for invalid number of arguments
-        // TODO: Add logfile handling
+        logMessage('parse_urls', ['File does not exist.', `Filename: ${filename}`]);
         exit(1);
     }
 
-    // TODO: Add logfile handling
-    let url_array = parse_urls(filename);
-    // TODO: Add logfile handling
+    logMessage('parse_urls', ['File exists, reading content.', `Filename: ${filename}`]);
+    const file_content = fs.readFileSync(filename, 'utf-8'); // Read file content
 
+    if (!file_content) {
+        logMessage('parse_urls', ['File content is empty.', 'Returning empty array.']);
+        return [];
+    }
+
+    logMessage('parse_urls', ['Parsing URLs from file content.', `Content length: ${file_content.length}`]);
+    return file_content.split('\n'); // Return array of URLs
+}
+
+export async function get_valid_urls(filename: string): Promise<string[]> {
+    logMessage('get_valid_urls', ['Getting valid URLs from file.', `Filename: ${filename}`]);
+
+    let args = process.argv.slice(2);
+    if (args.length != 1) {     // Check for invalid number of arguments
+        logMessage('get_valid_urls', ['Invalid number of arguments.', 'Exiting with error.']);
+        exit(1);
+    }
+
+    let url_array = parse_urls(filename);
     let valid_urls = [];
 
-    // TODO: Add logfile handling
-    for(let i = 0; i < url_array.length; i++){
-        try{
-            // TODO: Add logfile handling
-            if(await test_url(url_array[i])){
-                // TODO: Add logfile handling
+    for (let i = 0; i < url_array.length; i++) {
+        try {
+            logMessage('get_valid_urls', ['Testing URL for validity.', `URL: ${url_array[i]}`]);
+            if (await test_url(url_array[i])) {
+                logMessage('get_valid_urls', ['Valid URL found.', `Adding URL: ${url_array[i]}`]);
                 valid_urls.push(url_array[i]);
-            }
-            else{
-                // TODO: Add logfile handling
+            } else {
+                logMessage('get_valid_urls', ['Invalid URL found.', `URL: ${url_array[i]}`]);
             }
         } catch (error) {
-            // TODO: Add logfile handling
+            logMessage('get_valid_urls', ['Error processing URL.', `Error: ${error}`]);
             exit(1);
         }
     }
-    
-    // TODO: Add logfile handling
-    return(valid_urls);
+
+    logMessage('get_valid_urls', ['Returning valid URLs.', `Count: ${valid_urls.length}`]);
+    return valid_urls;
 }
