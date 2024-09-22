@@ -101,6 +101,6 @@ This project is licensed under the MIT License. For more details, see the [LICEN
 If you have any questions, suggestions, or need further information, feel free to reach out:
 
 - **Project Lead**: Your Name  
-  Email: [millerk@purdue.edu](mailto:millerk@purdue.edu)
+  Email: [mkodish@purdue.edu](mailto:mkodish@purdue.edu)
 
 - GitHub: [Miller11k](https://github.com/Miller11k)
