@@ -1,71 +1,76 @@
-import { calculateRampUpMain } from '../src/metrics/rampUp';
+import { calculateRampUp } from '../src/metrics/rampUp';
+import { fetchJsonFromApi } from '../src/API';
+import { getGitHubAPILink } from '../src/githubData';
+import { getTimestampWithThreeDecimalPlaces } from '../src/metrics/getLatency';
 
-describe('calculateRampUpMain', () => {
-    it('should calculate the RampUp score for npmjs packages with size information', () => {
-        const mockNpmPackageData = {
-            'dist-tags': { latest: '1.0.0' },
-            versions: {
-                '1.0.0': { dist: { unpackedSize: 1000000 } } // 1MB
-            }
-        };
+// Mock dependencies
+jest.mock('../src/API');
+jest.mock('../src/githubData');
+jest.mock('../src/metrics/getLatency');
 
-        const result = calculateRampUpMain(mockNpmPackageData, '0.5', 'npmjs');
-        expect(result.score).toBeGreaterThan(0); // Expect a positive score
-        expect(result.score).toBeLessThanOrEqual(1); // Score should be between 0 and 1
-        expect(parseFloat(result.latency)).toBeCloseTo(0.506, 3); // Adjusted precision
-    });
+describe('calculateRampUp', () => {
+  const mockRepoURL = 'https://github.com/example/repo';
+  const mockRepoData = { size: 10000 }; // 10 MB repository size
+  const mockRepoDataInvalid = { size: 0 };
 
-    it('should calculate the RampUp score for npmjs packages without size information', () => {
-        const mockNpmPackageData = {
-            'dist-tags': { latest: '1.0.0' },
-            versions: {
-                '1.0.0': {} // No size information
-            }
-        };
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
-        console.warn = jest.fn(); // Spy on console.warn
+  it('should return a valid score for a valid repository URL', async () => {
+    // Mock the API call and other dependencies
+    (getGitHubAPILink as jest.Mock).mockReturnValue('https://api.github.com/repos/example/repo');
+    (fetchJsonFromApi as jest.Mock).mockResolvedValue(mockRepoData); // Simulate repo data with size 10000 KB
+    (getTimestampWithThreeDecimalPlaces as jest.Mock).mockReturnValueOnce(1000).mockReturnValueOnce(1005); // Simulate latency
 
-        const result = calculateRampUpMain(mockNpmPackageData, '0.5', 'npmjs');
-        expect(result.score).toEqual(1); // Default score when no size is provided
-        expect(console.warn).toHaveBeenCalledWith('Package size information not available. Using default size of 0.');
-    });
+    const result = await calculateRampUp(mockRepoURL);
 
-    it('should calculate the RampUp score for GitHub repositories with size information', () => {
-        const mockGithubRepoData = {
-            size: 10000 // 10MB in KB
-        };
+    expect(result.score).toBeGreaterThan(0); // Score should be > 0 for a repo of size 10MB
+    expect(result.score).toEqual(0.8); // (1 - 10000 / 50000) = 0.8
+    expect(result.latency).toEqual(5); // Latency of 5ms (1005 - 1000)
+    expect(getGitHubAPILink).toHaveBeenCalledWith(mockRepoURL);
+    expect(fetchJsonFromApi).toHaveBeenCalledWith('https://api.github.com/repos/example/repo');
+  });
 
-        const result = calculateRampUpMain(mockGithubRepoData, '0.2', 'github');
-        expect(result.score).toBeGreaterThan(0); // Expect a positive score
-        expect(result.score).toBeLessThanOrEqual(1); // Score should be between 0 and 1
-        expect(parseFloat(result.latency)).toBeCloseTo(0.200, 3); // Ensure latency is calculated correctly
-    });
+  it('should handle errors gracefully', async () => {
+    // Simulate an API fetch error
+    (getGitHubAPILink as jest.Mock).mockReturnValue('https://api.github.com/repos/nonexistent-repo');
+    (fetchJsonFromApi as jest.Mock).mockRejectedValue(new Error('API Error'));
+    (getTimestampWithThreeDecimalPlaces as jest.Mock).mockReturnValueOnce(1000).mockReturnValueOnce(1005); // Simulate latency
 
-    it('should calculate the RampUp score for GitHub repositories without size information', () => {
-        const mockGithubRepoData = {};
+    await expect(calculateRampUp('https://github.com/nonexistent-repo')).rejects.toThrow('Error fetching repository data from GitHub');
+  });
 
-        console.warn = jest.fn(); // Spy on console.warn
+  it('should return a score of 1 for a very small repository', async () => {
+    (getGitHubAPILink as jest.Mock).mockReturnValue('https://api.github.com/repos/example/repo');
+    (fetchJsonFromApi as jest.Mock).mockResolvedValue({ size: 100 }); // Repo size of 100 KB
+    (getTimestampWithThreeDecimalPlaces as jest.Mock).mockReturnValueOnce(1000).mockReturnValueOnce(1002); // Simulate latency
 
-        const result = calculateRampUpMain(mockGithubRepoData, '0.5', 'github');
-        expect(result.score).toEqual(1); // Default score when no size is provided
-        expect(console.warn).toHaveBeenCalledWith('GitHub repository size information not available. Using default size of 0.');
-    });
+    const result = await calculateRampUp(mockRepoURL);
 
-    it('should return a low score for large GitHub repositories', () => {
-        const mockGithubRepoData = {
-            size: 60000 // 60MB in KB (over the limit of 50MB)
-        };
+    expect(result.score).toEqual(1); // Small repository should have score 1
+    expect(result.latency).toEqual(2); // Latency of 2ms (1002 - 1000)
+  });
 
-        const result = calculateRampUpMain(mockGithubRepoData, '1', 'github');
-        expect(result.score).toEqual(0); // Expect a score of 0 for overly large repos
-        expect(parseFloat(result.latency)).toBeCloseTo(1.000, 3); // Ensure latency is calculated correctly
-    });
+  it('should return a score of 0 if the repository size exceeds the max size', async () => {
+    (getGitHubAPILink as jest.Mock).mockReturnValue('https://api.github.com/repos/large-repo');
+    (fetchJsonFromApi as jest.Mock).mockResolvedValue({ size: 60000 }); // Repo size of 60 MB (larger than the max size)
+    (getTimestampWithThreeDecimalPlaces as jest.Mock).mockReturnValueOnce(1000).mockReturnValueOnce(1006); // Simulate latency
 
-    it('should throw an error for unsupported package types', () => {
-        const mockData = {};
+    const result = await calculateRampUp('https://github.com/large-repo');
 
-        expect(() => calculateRampUpMain(mockData, '0.5', 'unsupported')).toThrowError(
-            'Invalid package type. Only "npmjs" or "github" are supported.'
-        );
-    });
+    expect(result.score).toEqual(0); // Score should be 0 for a repo exceeding 50 MB
+    expect(result.latency).toEqual(6); // Latency of 6ms (1006 - 1000)
+  });
+
+  it('should return a score of 0 if the repository size is invalid or unavailable', async () => {
+    (getGitHubAPILink as jest.Mock).mockReturnValue('https://api.github.com/repos/invalid-repo');
+    (fetchJsonFromApi as jest.Mock).mockResolvedValue(mockRepoDataInvalid); // Invalid repo size
+    (getTimestampWithThreeDecimalPlaces as jest.Mock).mockReturnValueOnce(1000).mockReturnValueOnce(1004); // Simulate latency
+
+    const result = await calculateRampUp('https://github.com/invalid-repo');
+
+    expect(result.score).toEqual(1); // The default score is 1 if the size is not available (0 is considered a small repo)
+    expect(result.latency).toEqual(4); // Latency of 4ms (1004 - 1000)
+  });
 });

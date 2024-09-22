@@ -1,5 +1,5 @@
 import { getBusFactor } from '../src/metrics/busFactor';
-import { getContributionCounts } from '../src/github_data';
+import { getContributionCounts } from '../src/githubData';
 
 jest.mock('../src/github_data', () => ({
     getContributionCounts: jest.fn()
