@@ -19,7 +19,6 @@ Make sure the following dependencies are installed:
 1. Clone the project repository:
     ```bash
     git clone https://github.com/Miller11k/ECE-461.git
-    cd ECE-461
     ```
 
 2. Install project dependencies:
@@ -39,6 +38,11 @@ The CLI is designed to analyze npm modules by interacting with GitHub repositori
 npm run cli -- [OPTIONS]
 ```
 
+Example:
+```bash
+npm run cli -- --repo https://github.com/user/repository --metrics correctness,license
+```
+
 ## Options
 The CLI provides several options to customize its behavior:
 
@@ -56,6 +60,7 @@ The CLI requires a GitHub token for API access. To configure this:
 
    ```bash
    export GITHUB_TOKEN=your_personal_token_here
+
 
 ## Contributing
 We welcome contributions from the community. To contribute, please follow these steps:
@@ -86,14 +91,21 @@ We welcome contributions from the community. To contribute, please follow these 
 - Follow the project’s coding style and best practices.
 - Cite any code snippets or tools reused from third-party sources, including links to the original posts (e.g., Stack Overflow).
 
-## License
-This project is licensed under the MIT License. For more details, see the [LICENSE](https://github.com/Miller11k/ECE-461/blob/main/src/metrics/license.ts) file in the repository.
-
 ## Contact
 If you have any questions, suggestions, or need further information, feel free to reach out:
 
-- **Project Lead**: Miller Kodish  
-  Email: [mkodish@purdue.edu](mailto:mkodish@purdue.edu)
+### Miller Kodish (Project Lead)
+- **Email:** [mkodish@purdue.edu](mailto:mkodish@purdue.edu)
+- **GitHub:** [Miller11k](https://github.com/Miller11k)
 
-- GitHub: [Miller11k](https://github.com/Miller11k)
+### Daniel Shkembi
+- **Email:** [dshkembi@purdue.edu](mailto:dshkembi@purdue.edu)
+- **GitHub:** [DanielShkembi](https://github.com/DanielShkembi)
 
+### Alfredo Barandearan
+- **Email:** [abarande@purdue.edu](mailto:abarande@purdue.edu)
+- **GitHub:** [Abarande](https://github.com/Abarande)
+
+### Francisco Ramirez
+- **Email:** [fjramire@purdue.edu](mailto:fjramire@purdue.edu)
+- **GitHub:** [franjramirez](https://github.com/franjramirez)

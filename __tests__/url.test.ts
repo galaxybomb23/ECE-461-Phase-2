@@ -1,4 +1,4 @@
-import { url_type, test_url, parse_urls } from "../src/URL";
+import { URLType, testURL, parseURLs } from "../src/URL";
 import * as fs from 'fs';
 import { exit } from 'process';
 // Mocking fs.existsSync and fs.readFileSync
@@ -23,10 +23,11 @@ global.fetch = jest.fn(() =>
     text: jest.fn(),
   } as unknown as Response) // Casting here
 );
-describe('test_url', () => {
+
+describe('testURL', () => {
   it('should return true for a successful URL request', async () => {
     const url = 'https://github.com';
-    const result = await test_url(url);
+    const result = await testURL(url);
     expect(result).toBe(true);
   });
   it('should return false for a failed URL request', async () => {
@@ -48,40 +49,43 @@ describe('test_url', () => {
       } as unknown as Response)
     );
     const url = 'https://invalid-url.com';
-    const result = await test_url(url);
+    const result = await testURL(url);
     expect(result).toBe(false);
   });
   it('should return false if fetch throws an error', async () => {
     // Mock fetch to throw an error
     (global.fetch as jest.Mock).mockImplementationOnce(() => Promise.reject('Network error'));
     const url = 'https://error-url.com';
-    const result = await test_url(url);
+    const result = await testURL(url);
     expect(result).toBe(false);
   });
 });
-describe('url_type', () => {
+
+describe('URLType', () => {
   it('should return "github" for a GitHub URL', () => {
     const url = 'https://github.com/user/repo';
-    const result = url_type(url);
+    const result = URLType(url);
     expect(result).toBe('github');
   });
   it('should return "npmjs" for an npmjs URL', () => {
     const url = 'https://www.npmjs.com/package/express';
-    const result = url_type(url);
+    const result = URLType(url);
     expect(result).toBe('npmjs');
   });
   it('should return "other" for a non-GitHub/npmjs URL', () => {
     const url = 'https://www.example.com';
-    const result = url_type(url);
+    const result = URLType(url);
     expect(result).toBe('other');
   });
 });
-describe('parse_urls', () => {
+
+describe('parseURLs', () => {
   it('should exit with code 1 if the file does not exist', () => {
     // Mock fs.existsSync to return false
     (fs.existsSync as jest.Mock).mockReturnValue(false);
     // Call the function with a non-existent file
-    parse_urls('non_existent_file.txt');
+    parseURLs('non_existent_file.txt');
+
     // Expect process.exit to have been called with code 1
     expect(exit).toHaveBeenCalledWith(1);
   });
@@ -90,7 +94,8 @@ describe('parse_urls', () => {
     (fs.existsSync as jest.Mock).mockReturnValue(true);
     (fs.readFileSync as jest.Mock).mockReturnValue('');
     // Call the function with an empty file
-    const result = parse_urls('empty_file.txt');
+    const result = parseURLs('empty_file.txt');
+
     // Expect an empty array to be returned
     expect(result).toEqual([]);
   });
@@ -99,7 +104,8 @@ describe('parse_urls', () => {
     (fs.existsSync as jest.Mock).mockReturnValue(true);
     (fs.readFileSync as jest.Mock).mockReturnValue('https://github.com\nhttps://www.npmjs.com');
     // Call the function with a file containing URLs
-    const result = parse_urls('urls_file.txt');
+    const result = parseURLs('urls_file.txt');
+
     // Expect an array of URLs to be returned
     expect(result).toEqual(['https://github.com', 'https://www.npmjs.com']);
   });

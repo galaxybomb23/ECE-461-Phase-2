@@ -57,3 +57,8 @@ clean_js:
 	@find . -type f -name "*.js" -exec rm -f {} +
 	# Delete everything inside the `dist` directory, but keep the `dist` folder itself.
 	@find dist -mindepth 1 -delete
+
+reset:
+	@rm -rf node_modules
+	@find . -type f -name "*.js" -exec rm -f {} +
+	@find dist -mindepth 1 -delete
