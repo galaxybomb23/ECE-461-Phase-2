@@ -19,7 +19,6 @@ Make sure the following dependencies are installed:
 1. Clone the project repository:
     ```bash
     git clone https://github.com/yourusername/your-repo-name.git
-    cd your-repo-name
     ```
 
 2. Install project dependencies:
@@ -93,7 +92,7 @@ We welcome contributions from the community. To contribute, please follow these 
 - Cite any code snippets or tools reused from third-party sources, including links to the original posts (e.g., Stack Overflow).
 
 ## License
-This project is licensed under the MIT License. For more details, see the [LICENSE]((https://github.com/Miller11k/ECE-461/blob/main/src/metrics/license.ts)) file in the repository.
+This project is licensed under the MIT License. For more details, see the [LICENSE](https://github.com/Miller11k/ECE-461/blob/main/src/metrics/license.ts) file in the repository.
 
 ## Contact
 If you have any questions, suggestions, or need further information, feel free to reach out:
