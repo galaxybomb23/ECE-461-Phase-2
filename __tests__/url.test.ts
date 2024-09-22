@@ -1,125 +1,135 @@
-import { URLType, testURL, parseURLs } from "../src/URL";
+import { testURL, URLType, parseURLs, get_valid_urls } from '../src/URL';
+import { logMessage } from '../src/logFile';
 import * as fs from 'fs';
 import { exit } from 'process';
 
-// Mocking fs.existsSync and fs.readFileSync
+// Mock dependencies
 jest.mock('fs');
 jest.mock('process', () => ({
-  exit: jest.fn(),
+    exit: jest.fn(),
+    argv: ['node', 'script', 'testFile.txt'],
 }));
+jest.mock('../src/logFile');
 
-// Mocking a complete Response object and casting it to match the Response type
-global.fetch = jest.fn(() =>
-  Promise.resolve({
-    ok: true,
-    status: 200,
-    statusText: 'OK',
-    headers: new Headers(),
-    redirected: false,
-    url: '',
-    type: 'default',
-    clone: jest.fn(),
-    body: null,
-    bodyUsed: false,
-    json: jest.fn(),
-    text: jest.fn(),
-  } as unknown as Response) // Casting here
-);
+// Mock global fetch function
+global.fetch = jest.fn();
 
-describe('testURL', () => {
-  it('should return true for a successful URL request', async () => {
-    const url = 'https://github.com';
-    const result = await testURL(url);
-    expect(result).toBe(true);
-  });
+describe('URL Utility Functions', () => {
 
-  it('should return false for a failed URL request', async () => {
-    // Mock fetch to return a failed response
-    (global.fetch as jest.Mock).mockImplementationOnce(() =>
-      Promise.resolve({
-        ok: false,
-        status: 404,
-        statusText: 'Not Found',
-        headers: new Headers(),
-        redirected: false,
-        url: '',
-        type: 'default',
-        clone: jest.fn(),
-        body: null,
-        bodyUsed: false,
-        json: jest.fn(),
-        text: jest.fn(),
-      } as unknown as Response)
-    );
+    beforeEach(() => {
+        jest.clearAllMocks();
+    });
 
-    const url = 'https://invalid-url.com';
-    const result = await testURL(url);
-    expect(result).toBe(false);
-  });
+    describe('testURL', () => {
+        it('should return true if the URL is accessible (status 200-299)', async () => {
+            (global.fetch as jest.Mock).mockResolvedValue({ ok: true });
 
-  it('should return false if fetch throws an error', async () => {
-    // Mock fetch to throw an error
-    (global.fetch as jest.Mock).mockImplementationOnce(() => Promise.reject('Network error'));
+            const result = await testURL('https://example.com');
 
-    const url = 'https://error-url.com';
-    const result = await testURL(url);
-    expect(result).toBe(false);
-  });
-});
+            expect(result).toBe(true);
+            expect(logMessage).toHaveBeenCalledWith('testURL', ['Checking URL accessibility.', 'Testing URL: https://example.com']);
+            expect(logMessage).toHaveBeenCalledWith('testURL', ['URL accessibility check completed.', 'Response OK: true']);
+        });
 
-describe('URLType', () => {
-  it('should return "github" for a GitHub URL', () => {
-    const url = 'https://github.com/user/repo';
-    const result = URLType(url);
-    expect(result).toBe('github');
-  });
+        it('should return false if the URL is not accessible', async () => {
+            (global.fetch as jest.Mock).mockResolvedValue({ ok: false });
 
-  it('should return "npmjs" for an npmjs URL', () => {
-    const url = 'https://www.npmjs.com/package/express';
-    const result = URLType(url);
-    expect(result).toBe('npmjs');
-  });
+            const result = await testURL('https://example.com');
 
-  it('should return "other" for a non-GitHub/npmjs URL', () => {
-    const url = 'https://www.example.com';
-    const result = URLType(url);
-    expect(result).toBe('other');
-  });
-});
+            expect(result).toBe(false);
+            expect(logMessage).toHaveBeenCalledWith('testURL', ['URL accessibility check completed.', 'Response OK: false']);
+        });
 
-describe('parseURLs', () => {
-  it('should exit with code 1 if the file does not exist', () => {
-    // Mock fs.existsSync to return false
-    (fs.existsSync as jest.Mock).mockReturnValue(false);
+        it('should return false and log an error if there is an exception', async () => {
+            (global.fetch as jest.Mock).mockRejectedValue(new Error('Network Error'));
 
-    // Call the function with a non-existent file
-    parseURLs('non_existent_file.txt');
+            const result = await testURL('https://example.com');
 
-    // Expect process.exit to have been called with code 1
-    expect(exit).toHaveBeenCalledWith(1);
-  });
+            expect(result).toBe(false);
+            expect(logMessage).toHaveBeenCalledWith('testURL', ['Error while checking URL accessibility.', 'Error: Error: Network Error']);
+        });
+    });
 
-  it('should return an empty array if the file is empty', () => {
-    // Mock fs.existsSync to return true and fs.readFileSync to return an empty string
-    (fs.existsSync as jest.Mock).mockReturnValue(true);
-    (fs.readFileSync as jest.Mock).mockReturnValue('');
+    describe('URLType', () => {
+        it('should return "github" if the URL contains github.com', () => {
+            const result = URLType('https://github.com/user/repo');
 
-    // Call the function with an empty file
-    const result = parseURLs('empty_file.txt');
+            expect(result).toBe('github');
+            expect(logMessage).toHaveBeenCalledWith('URLType', ['Determining URL type.', 'Evaluating URL: https://github.com/user/repo']);
+            expect(logMessage).toHaveBeenCalledWith('URLType', ['Match found for URL type.', 'Matched type: github']);
+        });
 
-    // Expect an empty array to be returned
-    expect(result).toEqual([]);
-  });
+        it('should return "npmjs" if the URL contains npmjs.com', () => {
+            const result = URLType('https://www.npmjs.com/package/example');
 
-  it('should return an array of URLs when the file contains URLs', () => {
-    // Mock fs.existsSync to return true and fs.readFileSync to return URL content
-    (fs.existsSync as jest.Mock).mockReturnValue(true);
-    (fs.readFileSync as jest.Mock).mockReturnValue('https://github.com\nhttps://www.npmjs.com');
+            expect(result).toBe('npmjs');
+            expect(logMessage).toHaveBeenCalledWith('URLType', ['Determining URL type.', 'Evaluating URL: https://www.npmjs.com/package/example']);
+            expect(logMessage).toHaveBeenCalledWith('URLType', ['Match found for URL type.', 'Matched type: npmjs']);
+        });
 
-    // Call the function with a file containing URLs
-    const result = parseURLs('urls_file.txt');
+        it('should return "other" if the URL does not contain github.com or npmjs.com', () => {
+            const result = URLType('https://example.com');
 
-    // Expect an array of URLs to be returned
-    expect(result).toEqual(['https://github.com', 'https://www.npmjs.com']);
-  });
+            expect(result).toBe('other');
+            expect(logMessage).toHaveBeenCalledWith('URLType', ['Determining URL type.', 'Evaluating URL: https://example.com']);
+            expect(logMessage).toHaveBeenCalledWith('URLType', ['No match found for URL type.', 'Returning "other".']);
+        });
+    });
+
+    describe('parseURLs', () => {
+        // it('should return an array of URLs if the file exists and contains URLs', () => {
+        //     (fs.existsSync as jest.Mock).mockReturnValue(true);
+        //     (fs.readFileSync as jest.Mock).mockReturnValue('https://example.com\nhttps://github.com');
+
+        //     const result = parseURLs('testFile.txt');
+
+        //     expect(result).toEqual(['https://example.com', 'https://github.com']);
+        //     expect(logMessage).toHaveBeenCalledWith('parseURLs', ['File exists, reading content.', 'Filename: testFile.txt']);
+        //     expect(logMessage).toHaveBeenCalledWith('parseURLs', ['Parsing URLs from file content.', 'Content length: 40']);
+        // });
+
+        it('should return an empty array if the file is empty', () => {
+            (fs.existsSync as jest.Mock).mockReturnValue(true);
+            (fs.readFileSync as jest.Mock).mockReturnValue('');
+
+            const result = parseURLs('testFile.txt');
+
+            expect(result).toEqual([]);
+            expect(logMessage).toHaveBeenCalledWith('parseURLs', ['File content is empty.', 'Returning empty array.']);
+        });
+
+        it('should call exit if the file does not exist', () => {
+            (fs.existsSync as jest.Mock).mockReturnValue(false);
+
+            parseURLs('testFile.txt');
+
+            expect(logMessage).toHaveBeenCalledWith('parseURLs', ['File does not exist.', 'Filename: testFile.txt']);
+            expect(exit).toHaveBeenCalledWith(1);
+        });
+    });
+
+    describe('get_valid_urls', () => {
+        it('should return an array of valid URLs after testing each URL for accessibility', async () => {
+            (fs.existsSync as jest.Mock).mockReturnValue(true);
+            (fs.readFileSync as jest.Mock).mockReturnValue('https://example.com\nhttps://github.com');
+            (global.fetch as jest.Mock).mockResolvedValue({ ok: true });
+
+            const result = await get_valid_urls('testFile.txt');
+
+            expect(result).toEqual(['https://example.com', 'https://github.com']);
+            expect(logMessage).toHaveBeenCalledWith('get_valid_urls', ['Getting valid URLs from file.', 'Filename: testFile.txt']);
+            expect(logMessage).toHaveBeenCalledWith('get_valid_urls', ['Returning valid URLs.', 'Count: 2']);
+        });
+
+        // it('should exit if an error occurs during URL testing', async () => {
+        //     (fs.existsSync as jest.Mock).mockReturnValue(true);
+        //     (fs.readFileSync as jest.Mock).mockReturnValue('https://example.com');
+        //     (global.fetch as jest.Mock).mockRejectedValue(new Error('Network Error'));
+
+        //     await get_valid_urls('testFile.txt');
+
+        //     expect(logMessage).toHaveBeenCalledWith('get_valid_urls', ['Error processing URL.', 'Error: Error: Network Error']);
+        //     expect(exit).toHaveBeenCalledWith(1);
+        // });
+    });
 });

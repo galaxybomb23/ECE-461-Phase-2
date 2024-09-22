@@ -109,7 +109,7 @@ export function getContributionCounts(data: any[]): number[] {
  * @param {string} repo - The name of the repository.
  * @returns {Promise<number>} - The number of open issues.
  */
-async function fetchOpenIssuesCount(owner: string, repo: string): Promise<number> {
+export async function fetchOpenIssuesCount(owner: string, repo: string): Promise<number> {
     logMessage('fetchOpenIssuesCount - Initialization', [
         'Starting to fetch open issues count for the repository.',
         `Owner: ${owner}, Repository: ${repo}`
@@ -198,7 +198,7 @@ async function fetchOpenIssuesCount(owner: string, repo: string): Promise<number
  * @param {string} repo - The name of the repository.
  * @returns {Promise<number>} - The number of closed issues.
  */
-async function fetchClosedIssuesCount(owner: string, repo: string): Promise<number> {
+export async function fetchClosedIssuesCount(owner: string, repo: string): Promise<number> {
     logMessage('fetchClosedIssuesCount - Initialization', [
         'Starting to fetch closed issues count for the repository.',
         `Owner: ${owner}, Repository: ${repo}`
