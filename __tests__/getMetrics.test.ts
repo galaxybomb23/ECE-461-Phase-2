@@ -1,102 +1,118 @@
-import { get_metrics } from '../src/metrics/getMetrics';
+import { getMetrics } from '../src/metrics/getMetrics';
 import { getBusFactor } from '../src/metrics/busFactor';
 import { getLicenseScore } from '../src/metrics/license';
+import { formatJSON, initJSON } from '../src/json';
+import { URLType } from '../src/URL';
+import { getNodeJsAPILink } from '../src/npmjsData';
 import { calculateCorrectness } from '../src/metrics/correctness';
 import { calculateRampUp } from '../src/metrics/rampUp';
 import { calculateResponsiveMaintainer } from '../src/metrics/responsiveMaintainer';
 import { getNetScore, getNetScoreLatency } from '../src/metrics/netScore';
 import { getNumberOfCores } from '../src/multithread';
 import { logMessage } from '../src/logFile';
-import { formatJSON, initJSON } from '../src/json';
-import { getNodeJsAPILink } from '../src/npmjsData';
-import { url_type } from '../src/URL';
 
-// Mock all dependencies
-jest.mock('../src/busFactor', () => ({ getBusFactor: jest.fn() }));
-jest.mock('../src/license', () => ({ getLicenseScore: jest.fn() }));
-jest.mock('../src/correctness', () => ({ calculateCorrectness: jest.fn() }));
-jest.mock('../src/rampUp', () => ({ calculateRampUp: jest.fn() }));
-jest.mock('../src/responsiveMaintainer', () => ({ calculateResponsiveMaintainer: jest.fn() }));
-jest.mock('../src/netScore', () => ({
-  getNetScore: jest.fn(),
-  getNetScoreLatency: jest.fn(),
-}));
-jest.mock('../src/multithread', () => ({ getNumberOfCores: jest.fn() }));
-jest.mock('../src/logFile', () => ({ logMessage: jest.fn() }));
-jest.mock('../src/json', () => ({
-  formatJSON: jest.fn(),
-  initJSON: jest.fn(),
-}));
-jest.mock('../src/npmjsData', () => ({ getNodeJsAPILink: jest.fn() }));
-jest.mock('../src/URL', () => ({ url_type: jest.fn() }));
+// Mock dependencies
+jest.mock('../src/metrics/busFactor');
+jest.mock('../src/metrics/license');
+jest.mock('../src/metrics/correctness');
+jest.mock('../src/metrics/rampUp');
+jest.mock('../src/metrics/responsiveMaintainer');
+jest.mock('../src/metrics/netScore');
+jest.mock('../src/npmjsData');
+jest.mock('../src/json');
+jest.mock('../src/URL');
+jest.mock('../src/multithread');
+jest.mock('../src/logFile');
 
-describe('get_metrics', () => {
+describe('getMetrics', () => {
+  const mockURL = 'https://github.com/example/repo';
+  const mockNpmURL = 'https://www.npmjs.com/package/example';
+  const mockNodeJsAPIURL = 'https://registry.npmjs.org/example';
+  const mockRepoData = {
+    BusFactor: 0.5,
+    BusFactor_Latency: 10,
+    Correctness: 0.7,
+    Correctness_Latency: 8,
+    License: 1,
+    License_Latency: 6,
+    RampUp: 0.9,
+    RampUp_Latency: 7,
+    ResponsiveMaintainer: 0.6,
+    ResponsiveMaintainer_Latency: 9,
+    NetScore: 0.75,
+    NetScore_Latency: 40
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('should fetch metrics and return formatted JSON for a given URL', async () => {
-    const mockURL = 'https://github.com/cloudinary/cloudinary_npm';
-    const mockRepoData = {
-      URL: mockURL,
-      BusFactor: 5,
-      BusFactor_Latency: 200,
-      Correctness: 4,
-      Correctness_Latency: 150,
-      License: 3,
-      License_Latency: 100,
-      RampUp: 4,
-      RampUp_Latency: 100,
-      ResponsiveMaintainer: 5,
-      ResponsiveMaintainer_Latency: 250,
-      NetScore: 4.2,
-      NetScore_Latency: 200,
-    };
-
-    // Mock the return values of the functions
-    (initJSON as jest.Mock).mockReturnValue(mockRepoData);
-    (getNumberOfCores as jest.Mock).mockReturnValue(8);
-    (url_type as jest.Mock).mockReturnValue('github');
-    (getBusFactor as jest.Mock).mockResolvedValue({ score: 5, latency: 200 });
-    (calculateCorrectness as jest.Mock).mockResolvedValue({ score: 4, latency: 150 });
-    (getLicenseScore as jest.Mock).mockResolvedValue({ score: 3, latency: 100 });
-    (calculateRampUp as jest.Mock).mockResolvedValue({ score: 4, latency: 100 });
-    (calculateResponsiveMaintainer as jest.Mock).mockResolvedValue({ score: 5, latency: 250 });
-    (getNetScore as jest.Mock).mockResolvedValue(4.2);
-    (getNetScoreLatency as jest.Mock).mockResolvedValue(200);
+  it('should return the correct metrics for a GitHub repository URL', async () => {
+    // Mock the dependencies
+    (initJSON as jest.Mock).mockReturnValue({}); // Mock empty JSON initialization
+    (getNumberOfCores as jest.Mock).mockReturnValue(4); // Mock number of cores
+    (URLType as jest.Mock).mockReturnValue('github'); // Mock URL type detection
+    (getBusFactor as jest.Mock).mockResolvedValue({ score: 0.5, latency: 10 });
+    (calculateCorrectness as jest.Mock).mockResolvedValue({ score: 0.7, latency: 8 });
+    (getLicenseScore as jest.Mock).mockResolvedValue({ score: 1, latency: 6 });
+    (calculateRampUp as jest.Mock).mockResolvedValue({ score: 0.9, latency: 7 });
+    (calculateResponsiveMaintainer as jest.Mock).mockResolvedValue({ score: 0.6, latency: 9 });
+    (getNetScore as jest.Mock).mockResolvedValue(0.75);
+    (getNetScoreLatency as jest.Mock).mockResolvedValue(40);
     (formatJSON as jest.Mock).mockReturnValue(JSON.stringify(mockRepoData));
 
-    const result = await get_metrics(mockURL);
+    const result = await getMetrics(mockURL);
 
-    // Check if metrics and latencies are correctly fetched
+    expect(initJSON).toHaveBeenCalled();
+    expect(getNumberOfCores).toHaveBeenCalled();
     expect(getBusFactor).toHaveBeenCalledWith(mockURL);
     expect(calculateCorrectness).toHaveBeenCalledWith(mockURL);
     expect(getLicenseScore).toHaveBeenCalledWith(mockURL);
     expect(calculateRampUp).toHaveBeenCalledWith(mockURL);
     expect(calculateResponsiveMaintainer).toHaveBeenCalledWith(mockURL);
-
-    // Check if Net Score calculation is correct
-    expect(getNetScore).toHaveBeenCalledWith(4, 4, 5, 5, 3);
-    expect(getNetScoreLatency).toHaveBeenCalledWith(100, 150, 200, 250, 100);
-
-    // Check if formatJSON is called with the correct data
-    expect(formatJSON).toHaveBeenCalledWith(mockRepoData);
-
-    // Check the final result
+    expect(getNetScore).toHaveBeenCalledWith(0.9, 0.7, 0.5, 0.6, 1);
+    expect(getNetScoreLatency).toHaveBeenCalledWith(7, 8, 10, 9, 6);
+    expect(formatJSON).toHaveBeenCalledWith(expect.any(Object)); // Ensure the JSON is formatted
     expect(result).toEqual(JSON.stringify(mockRepoData));
   });
 
-  it('should convert npmjs URL and fetch Node.js API link', async () => {
-    const npmURL = 'https://www.npmjs.com/package/example';
-    const nodeJsApiLink = 'https://api.nodejs.org/example';
+  it('should convert npmjs URL to Node.js API link and return the correct metrics', async () => {
+    // Mock the dependencies
+    (initJSON as jest.Mock).mockReturnValue({}); // Mock empty JSON initialization
+    (getNumberOfCores as jest.Mock).mockReturnValue(4); // Mock number of cores
+    (URLType as jest.Mock).mockReturnValue('npmjs'); // Mock URL type detection
+    (getNodeJsAPILink as jest.Mock).mockResolvedValue(mockNodeJsAPIURL); // Mock npmjs to Node.js API link conversion
+    (getBusFactor as jest.Mock).mockResolvedValue({ score: 0.5, latency: 10 });
+    (calculateCorrectness as jest.Mock).mockResolvedValue({ score: 0.7, latency: 8 });
+    (getLicenseScore as jest.Mock).mockResolvedValue({ score: 1, latency: 6 });
+    (calculateRampUp as jest.Mock).mockResolvedValue({ score: 0.9, latency: 7 });
+    (calculateResponsiveMaintainer as jest.Mock).mockResolvedValue({ score: 0.6, latency: 9 });
+    (getNetScore as jest.Mock).mockResolvedValue(0.75);
+    (getNetScoreLatency as jest.Mock).mockResolvedValue(40);
+    (formatJSON as jest.Mock).mockReturnValue(JSON.stringify(mockRepoData));
 
-    (url_type as jest.Mock).mockReturnValue('npmjs');
-    (getNodeJsAPILink as jest.Mock).mockResolvedValue(nodeJsApiLink);
-    (initJSON as jest.Mock).mockReturnValue({ URL: npmURL });
+    const result = await getMetrics(mockNpmURL);
 
-    await get_metrics(npmURL);
+    expect(initJSON).toHaveBeenCalled();
+    expect(getNodeJsAPILink).toHaveBeenCalledWith(mockNpmURL); // Ensure npmjs URL was converted
+    expect(getBusFactor).toHaveBeenCalledWith(mockNodeJsAPIURL);
+    expect(calculateCorrectness).toHaveBeenCalledWith(mockNodeJsAPIURL);
+    expect(getLicenseScore).toHaveBeenCalledWith(mockNodeJsAPIURL);
+    expect(calculateRampUp).toHaveBeenCalledWith(mockNodeJsAPIURL);
+    expect(calculateResponsiveMaintainer).toHaveBeenCalledWith(mockNodeJsAPIURL);
+    expect(getNetScore).toHaveBeenCalledWith(0.9, 0.7, 0.5, 0.6, 1);
+    expect(getNetScoreLatency).toHaveBeenCalledWith(7, 8, 10, 9, 6);
+    expect(formatJSON).toHaveBeenCalledWith(expect.any(Object)); // Ensure the JSON is formatted
+    expect(result).toEqual(JSON.stringify(mockRepoData));
+  });
 
-    // Check if npm URL is converted to Node.js API link
-    expect(getNodeJsAPILink).toHaveBeenCalledWith(npmURL);
+  it('should handle errors gracefully during metrics calculation', async () => {
+    // Mock the dependencies to simulate an error during the calculation
+    (initJSON as jest.Mock).mockReturnValue({}); // Mock empty JSON initialization
+    (getNumberOfCores as jest.Mock).mockReturnValue(4); // Mock number of cores
+    (URLType as jest.Mock).mockReturnValue('github'); // Mock URL type detection
+    (getBusFactor as jest.Mock).mockRejectedValue(new Error('Bus Factor calculation failed'));
+
+    await expect(getMetrics(mockURL)).rejects.toThrow('Bus Factor calculation failed');
   });
 });

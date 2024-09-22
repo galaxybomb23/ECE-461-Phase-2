@@ -23,12 +23,12 @@ describe('getTimestampWithThreeDecimalPlaces', () => {
     
     // Mock the implementation of the Date constructor to always return the mock date
     global.Date = jest.fn(() => mockDate) as unknown as typeof Date;
-
+  
     // Call the function
     const result = getTimestampWithThreeDecimalPlaces();
-
-    // Assert that the result is correct
-    expect(result).toBe(1724222430.456); // 1724222430 seconds + 456 ms (converted to fraction)
+  
+    // The correct Unix timestamp for '2024-09-21T10:20:30.456Z' is 1726914030.456
+    expect(result).toBe(1726914030.456);
     
     // Ensure logMessage was called
     expect(logMessage).toHaveBeenCalledWith(
@@ -37,7 +37,7 @@ describe('getTimestampWithThreeDecimalPlaces', () => {
     );
     expect(logMessage).toHaveBeenCalledWith(
       'getTimestampWithThreeDecimalPlaces',
-      ['Timestamp calculated.', `Seconds: 1724222430, Milliseconds: 456`]
+      ['Timestamp calculated.', `Seconds: 1726914030, Milliseconds: 456`]
     );
   });
 

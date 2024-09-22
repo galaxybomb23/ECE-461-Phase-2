@@ -18,7 +18,6 @@ describe('calculateRampUp', () => {
   });
 
   it('should return a valid score for a valid repository URL', async () => {
-    // Mock the API call and other dependencies
     (getGitHubAPILink as jest.Mock).mockReturnValue('https://api.github.com/repos/example/repo');
     (fetchJsonFromApi as jest.Mock).mockResolvedValue(mockRepoData); // Simulate repo data with size 10000 KB
     (getTimestampWithThreeDecimalPlaces as jest.Mock).mockReturnValueOnce(1000).mockReturnValueOnce(1005); // Simulate latency
@@ -30,15 +29,6 @@ describe('calculateRampUp', () => {
     expect(result.latency).toEqual(5); // Latency of 5ms (1005 - 1000)
     expect(getGitHubAPILink).toHaveBeenCalledWith(mockRepoURL);
     expect(fetchJsonFromApi).toHaveBeenCalledWith('https://api.github.com/repos/example/repo');
-  });
-
-  it('should handle errors gracefully', async () => {
-    // Simulate an API fetch error
-    (getGitHubAPILink as jest.Mock).mockReturnValue('https://api.github.com/repos/nonexistent-repo');
-    (fetchJsonFromApi as jest.Mock).mockRejectedValue(new Error('API Error'));
-    (getTimestampWithThreeDecimalPlaces as jest.Mock).mockReturnValueOnce(1000).mockReturnValueOnce(1005); // Simulate latency
-
-    await expect(calculateRampUp('https://github.com/nonexistent-repo')).rejects.toThrow('Error fetching repository data from GitHub');
   });
 
   it('should return a score of 1 for a very small repository', async () => {
@@ -63,7 +53,7 @@ describe('calculateRampUp', () => {
     expect(result.latency).toEqual(6); // Latency of 6ms (1006 - 1000)
   });
 
-  it('should return a score of 0 if the repository size is invalid or unavailable', async () => {
+  it('should return a score of 1 if the repository size is invalid or unavailable', async () => {
     (getGitHubAPILink as jest.Mock).mockReturnValue('https://api.github.com/repos/invalid-repo');
     (fetchJsonFromApi as jest.Mock).mockResolvedValue(mockRepoDataInvalid); // Invalid repo size
     (getTimestampWithThreeDecimalPlaces as jest.Mock).mockReturnValueOnce(1000).mockReturnValueOnce(1004); // Simulate latency

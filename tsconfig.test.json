@@ -5,7 +5,8 @@
       "esModuleInterop": true,
       "outDir": "./dist/tests",
       "strict": true,
-      "skipLibCheck": true
+      "skipLibCheck": true,
+      "types": ["jest"]
     },
     "include": [
       "__tests__/**/*"

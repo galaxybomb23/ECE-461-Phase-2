@@ -92,3 +92,6 @@ export function logMessage(component: string, messages: string[]) {
     const logEntry = `[${timestamp}][${type}][${component}] ${log_message}\n`;
     fs.appendFileSync(logFilePath, logEntry, 'utf-8'); // Append the log entry to the file
 }
+
+// Ensure these functions are exported
+export { getUserTimezone, ensureLogFileExists, formatTimestamp };

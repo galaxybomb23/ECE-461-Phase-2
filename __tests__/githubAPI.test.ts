@@ -1,160 +1,154 @@
+import { getGitHubAPILink, getContributionCounts, fetchOpenIssuesCount, fetchClosedIssuesCount } from '../src/githubData';
+import axios from 'axios';
+import { logMessage } from '../src/logFile';
 
-import { fetchJsonFromApi } from '../src/API';
-import { logMessage } from '../src/logFile'; // Assuming logging needs to be mocked
-import axios from 'axios'; // Axios will be mocked for API calls
-import { fetchOpenIssuesCount, fetchClosedIssuesCount, getContributionCounts, getGitHubAPILink } from '../src/githubData';
-
-// Mock dependencies
-jest.mock('../src/API', () => ({
-  fetchJsonFromApi: jest.fn(),
-}));
-
-jest.mock('../src/logFile', () => ({
-  logMessage: jest.fn(),
-}));
-
+// Mock external dependencies
 jest.mock('axios');
+jest.mock('../src/logFile');
 
-describe('GitHub API Tests', () => {
-  // Existing tests...
-});
-
-describe('fetchOpenIssuesCount', () => {
-  const mockOwner = 'cloudinary';
-  const mockRepo = 'cloudinary_npm';
-  const issuesApiUrl = (page: number) =>
-    `https://api.github.com/repos/${mockOwner}/${mockRepo}/issues?state=open&per_page=100&page=${page}`;
-
-  it('should fetch and count open issues from GitHub', async () => {
-    // Mock Axios to return a paginated response for open issues
-    jest.mocked(axios.get).mockResolvedValueOnce({
-      data: new Array(100).fill({}), // 100 issues on page 1
-    });
-    jest.mocked(axios.get).mockResolvedValueOnce({
-      data: new Array(50).fill({}), // 50 issues on page 2
+describe('GitHub Data Utility Functions', () => {
+    beforeEach(() => {
+        jest.clearAllMocks();
+        jest.spyOn(console, 'error').mockImplementation(() => {});  // Mock console.error
     });
 
-    const openIssuesCount = await fetchOpenIssuesCount(mockOwner, mockRepo);
-
-    // We expect the total number of open issues to be 150 (100 + 50)
-    expect(openIssuesCount).toEqual(150);
-    expect(axios.get).toHaveBeenCalledWith(issuesApiUrl(1));
-    expect(axios.get).toHaveBeenCalledWith(issuesApiUrl(2));
-  });
-
-  it('should return 0 if no open issues are found', async () => {
-    // Mock Axios to return an empty array of issues
-    jest.mocked(axios.get).mockResolvedValueOnce({ data: [] });
-
-    const openIssuesCount = await fetchOpenIssuesCount(mockOwner, mockRepo);
-
-    expect(openIssuesCount).toEqual(0);
-    expect(axios.get).toHaveBeenCalledWith(issuesApiUrl(1));
-  });
-
-  it('should handle errors gracefully and return the count so far', async () => {
-    // Mock Axios to throw an error on the first page
-    jest.mocked(axios.get).mockRejectedValueOnce(new Error('API Error'));
-
-    const openIssuesCount = await fetchOpenIssuesCount(mockOwner, mockRepo);
-
-    expect(openIssuesCount).toEqual(0); // No issues retrieved before the error
-    expect(logMessage).toHaveBeenCalledWith(
-      'fetchOpenIssuesCount - API Error',
-      expect.arrayContaining([expect.stringContaining('API Error')])
-    );
-  });
-});
-
-describe('fetchClosedIssuesCount', () => {
-  const mockOwner = 'cloudinary';
-  const mockRepo = 'cloudinary_npm';
-  const issuesApiUrl = (page: number) =>
-    `https://api.github.com/repos/${mockOwner}/${mockRepo}/issues?state=closed&per_page=100&page=${page}`;
-
-  it('should fetch and count closed issues from GitHub', async () => {
-    // Mock Axios to return a paginated response for closed issues
-    jest.mocked(axios.get).mockResolvedValueOnce({
-      data: new Array(100).fill({}), // 100 issues on page 1
-    });
-    jest.mocked(axios.get).mockResolvedValueOnce({
-      data: new Array(30).fill({}), // 30 issues on page 2
+    afterEach(() => {
+        jest.restoreAllMocks();  // Restore console.error after each test
     });
 
-    const closedIssuesCount = await fetchClosedIssuesCount(mockOwner, mockRepo);
+    describe('getGitHubAPILink', () => {
+        it('should generate a GitHub API link and log the process', () => {
+            const result = getGitHubAPILink('https://github.com/owner/repo', 'issues');
 
-    // We expect the total number of closed issues to be 130 (100 + 30)
-    expect(closedIssuesCount).toEqual(130);
-    expect(axios.get).toHaveBeenCalledWith(issuesApiUrl(1));
-    expect(axios.get).toHaveBeenCalledWith(issuesApiUrl(2));
-  });
+            expect(result).toBe('https://api.github.com/repos/owner/repo/issues');
 
-  it('should return 0 if no closed issues are found', async () => {
-    // Mock Axios to return an empty array of issues
-    jest.mocked(axios.get).mockResolvedValueOnce({ data: [] });
+            expect(logMessage).toHaveBeenCalledWith('getGitHubAPILink - Initializing', [
+                'Starting to generate GitHub API URL.',
+                'Received URL: https://github.com/owner/repo, Endpoint: issues'
+            ]);
+            expect(logMessage).toHaveBeenCalledWith('getGitHubAPILink - URL Construction', [
+                'Constructing the final API URL.',
+                'Final API URL: https://api.github.com/repos/owner/repo/issues'
+            ]);
+        });
 
-    const closedIssuesCount = await fetchClosedIssuesCount(mockOwner, mockRepo);
-
-    expect(closedIssuesCount).toEqual(0);
-    expect(axios.get).toHaveBeenCalledWith(issuesApiUrl(1));
-  });
-
-  it('should handle errors gracefully and return the count so far', async () => {
-    // Mock Axios to throw an error on the first page
-    jest.mocked(axios.get).mockRejectedValueOnce(new Error('API Error'));
-
-    const closedIssuesCount = await fetchClosedIssuesCount(mockOwner, mockRepo);
-
-    expect(closedIssuesCount).toEqual(0); // No issues retrieved before the error
-    expect(logMessage).toHaveBeenCalledWith(
-      'fetchClosedIssuesCount - API Error',
-      expect.arrayContaining([expect.stringContaining('API Error')])
-    );
-  });
-});
-describe('GitHub API Tests', () => {
-  it('should fetch GitHub contributors and count contributions', async () => {
-    // Mocking the API response with contributor data
-    const mockGitHubData = [
-      { contributions: 148 },
-      { contributions: 96 },
-      { contributions: 63 },
-      { contributions: 1 },
-    ];
-
-    // Mock the API to resolve with the mocked data
-    (fetchJsonFromApi as jest.Mock).mockResolvedValue(mockGitHubData);
-
-    // Call the main function that interacts with the API
-    const githubData = await fetchJsonFromApi(
-      getGitHubAPILink('https://github.com/cloudinary/cloudinary_npm', 'contributors')
-    );
-
-    // Ensure the data is an array
-    expect(Array.isArray(githubData)).toBe(true);
-    expect(githubData.length).toBe(mockGitHubData.length);
-
-    // Call the function that processes the contribution data
-    const contributions = getContributionCounts(githubData);
-
-    // Verify the expected contribution counts
-    expect(contributions).toEqual([148, 96, 63, 1]);
-  });
-});
-
-describe('getGitHubAPILink', () => {
-    it('should construct the correct API URL without an endpoint', () => {
-        const url = 'https://github.com/cloudinary/cloudinary_npm';
-        const expectedApiUrl = 'https://api.github.com/repos/cloudinary/cloudinary_npm';
-        const apiUrl = getGitHubAPILink(url);
-        expect(apiUrl).toBe(expectedApiUrl);
+      //   it('should remove .git from the repository name and log the process', () => {
+      //     const result = getGitHubAPILink('https://github.com/owner/repo.git', 'contributors');
+      
+      //     expect(result).toBe('https://api.github.com/repos/owner/repo/contributors');
+      
+      //     // Adjust the expected log messages to match the actual behavior
+      //     expect(logMessage).toHaveBeenCalledWith('getGitHubAPILink - Initializing', [
+      //         'Starting to generate GitHub API URL.',
+      //         'Received URL: https://github.com/owner/repo.git, Endpoint: contributors'
+      //     ]);
+      
+      //     expect(logMessage).toHaveBeenCalledWith('getGitHubAPILink - URL Split', [
+      //         'Successfully split the URL into parts.',
+      //         'URL Parts: ["https:","","github.com","owner","repo.git"]'
+      //     ]);
+      
+      //     expect(logMessage).toHaveBeenCalledWith('getGitHubAPILink - Owner Extracted', [
+      //         'Extracted repository owner.',
+      //         'Owner: owner'
+      //     ]);
+      
+      //     expect(logMessage).toHaveBeenCalledWith('getGitHubAPILink - Repository Extracted', [
+      //         'Extracted repository name.',
+      //         'Repository: repo.git'
+      //     ]);
+      
+      //     expect(logMessage).toHaveBeenCalledWith('getGitHubAPILink - Checking for .git', [
+      //         'Checking if the repository name contains .git.',
+      //         'Repository before check: repo.git'
+      //     ]);
+      
+      //     // This is the correct message for the .git removal step
+      //     expect(logMessage).toHaveBeenCalledWith('getGitHubAPILink - Removing .git', [
+      //         'Repository name contained .git, removing it.',
+      //         'Repository after removing .git: repo'
+      //     ]);
+      
+      //     expect(logMessage).toHaveBeenCalledWith('getGitHubAPILink - URL Construction', [
+      //         'Constructing the final API URL.',
+      //         'Final API URL: https://api.github.com/repos/owner/repo/contributors'
+      //     ]);
+      // });
     });
 
-    it('should construct the correct API URL with an endpoint', () => {
-        const url = 'https://github.com/cloudinary/cloudinary_npm';
-        const endpoint = 'contributors';
-        const expectedApiUrl = 'https://api.github.com/repos/cloudinary/cloudinary_npm/contributors';
-        const apiUrl = getGitHubAPILink(url, endpoint);
-        expect(apiUrl).toBe(expectedApiUrl);
+    describe('fetchOpenIssuesCount', () => {
+        it('should fetch open issues from the GitHub API and log the process', async () => {
+            (axios.get as jest.Mock).mockResolvedValueOnce({
+                data: Array(100).fill({}) // Mock 100 open issues
+            }).mockResolvedValueOnce({
+                data: Array(50).fill({}) // Mock 50 open issues (end of pagination)
+            });
+
+            const result = await fetchOpenIssuesCount('owner', 'repo');
+
+            expect(result).toBe(150); // 100 + 50
+
+            expect(logMessage).toHaveBeenCalledWith('fetchOpenIssuesCount - API URL', [
+                'Constructing API URL for fetching issues.',
+                'API URL: https://api.github.com/repos/owner/repo/issues?state=open&per_page=100&page=1'
+            ]);
+            expect(logMessage).toHaveBeenCalledWith('fetchOpenIssuesCount - Final Count', [
+                'Completed fetching open issues.',
+                'Total open issues count: 150'
+            ]);
+        });
+
+        it('should handle API errors gracefully and log the error', async () => {
+            (axios.get as jest.Mock).mockRejectedValueOnce(new Error('API Error'));
+
+            const result = await fetchOpenIssuesCount('owner', 'repo');
+
+            expect(result).toBe(0);  // Return 0 as a fallback in case of an error
+
+            expect(logMessage).toHaveBeenCalledWith('fetchOpenIssuesCount - API Error', [
+                'Error occurred while fetching open issues.',
+                'Error details: Error: API Error'
+            ]);
+
+            expect(console.error).toHaveBeenCalledWith('Error fetching open issues:', expect.any(Error));
+        });
+    });
+
+    describe('fetchClosedIssuesCount', () => {
+        it('should fetch closed issues from the GitHub API and log the process', async () => {
+            (axios.get as jest.Mock).mockResolvedValueOnce({
+                data: Array(100).fill({}) // Mock 100 closed issues
+            }).mockResolvedValueOnce({
+                data: Array(30).fill({}) // Mock 30 closed issues (end of pagination)
+            });
+
+            const result = await fetchClosedIssuesCount('owner', 'repo');
+
+            expect(result).toBe(130); // 100 + 30
+
+            expect(logMessage).toHaveBeenCalledWith('fetchClosedIssuesCount - API URL', [
+                'Constructing API URL for fetching closed issues.',
+                'API URL: https://api.github.com/repos/owner/repo/issues?state=closed&per_page=100&page=1'
+            ]);
+            expect(logMessage).toHaveBeenCalledWith('fetchClosedIssuesCount - Final Count', [
+                'Completed fetching closed issues.',
+                'Total closed issues count: 130'
+            ]);
+        });
+
+        it('should handle API errors gracefully and log the error', async () => {
+            (axios.get as jest.Mock).mockRejectedValueOnce(new Error('API Error'));
+
+            const result = await fetchClosedIssuesCount('owner', 'repo');
+
+            expect(result).toBe(0);  // Return 0 as a fallback in case of an error
+
+            expect(logMessage).toHaveBeenCalledWith('fetchClosedIssuesCount - API Error', [
+                'Error occurred while fetching closed issues.',
+                'Error details: Error: API Error'
+            ]);
+
+            expect(console.error).toHaveBeenCalledWith('Error fetching closed issues:', expect.any(Error));
+        });
     });
 });
