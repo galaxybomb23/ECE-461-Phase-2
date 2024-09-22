@@ -94,20 +94,18 @@ We welcome contributions from the community. To contribute, please follow these 
 ## Contact
 If you have any questions, suggestions, or need further information, feel free to reach out:
 
-- **Project Lead**:
-### Miller Kodish  
-  Email: [mkodish@purdue.edu](mailto:mkodish@purdue.edu)
-  GitHub: [Miller11k](https://github.com/Miller11k)
+### Miller Kodish (Project Lead)
+- **Email:** [mkodish@purdue.edu](mailto:mkodish@purdue.edu)
+- **GitHub:** [Miller11k](https://github.com/Miller11k)
 
-- **Project Team Members**:
 ### Daniel Shkembi
 - **Email:** [dshkembi@purdue.edu](mailto:dshkembi@purdue.edu)
 - **GitHub:** [DanielShkembi](https://github.com/DanielShkembi)
 
-## Alfredo Barandearan
+### Alfredo Barandearan
 - **Email:** [abarande@purdue.edu](mailto:abarande@purdue.edu)
 - **GitHub:** [Abarande](https://github.com/Abarande)
 
-## Francisco Ramirez
+### Francisco Ramirez
 - **Email:** [fjramire@purdue.edu](mailto:fjramire@purdue.edu)
 - **GitHub:** [franjramirez](https://github.com/franjramirez)
