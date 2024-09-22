@@ -9,8 +9,14 @@ install_npm_packages() {
     fi
     # Install the latest version of axios
     npm install axios@latest
-    # Compile TypeScript files
-    tsc src/index.ts
+}
+
+# Function to compile both project and test files into dist directory
+compile_all() {
+    # Compile TypeScript files (in dist)
+    tsc
+    # Compile Test Files (in dist)
+    tsc -p tsconfig.test.json
 }
 
 # Function to set up environment files
@@ -61,12 +67,12 @@ process_url_file() {
 # Function to run the project
 run_project() {
     # Check if compiled JavaScript file exists
-    if [ -f "src/index.js" ]; then
-        node src/index.js "$1"
+    if [ -f "dist/index.js" ]; then
+        node dist/index.js "$1"
     else
         # Compile TypeScript and run the project
-        if tsc src/index.ts; then
-            node src/index.js "$1"
+        if compile_all; then
+            node dist/index.js "$1"
         else
             echo "TypeScript compilation failed."
             exit 1
@@ -94,7 +100,7 @@ fi
 if [ "$1" = "install" ]; then
     install_npm_packages
     setup_environment_files
-    tsc src/index.ts
+    compile_all
 
 # Check if the argument is "test"
 elif [ "$1" = "test" ]; then
@@ -106,7 +112,7 @@ else
     run_project "$1"
     if [ $? -ne 0 ]; then
         # Check for module not found error
-        if grep -q "Cannot find module" <<< "$(node src/index.js "$1" 2>&1)"; then
+        if grep -q "Cannot find module" <<< "$(node dist/index.js "$1" 2>&1)"; then
             while true; do
                 echo "Module not found. Would you like to refresh the packages? (Y/n)"
                 read -r response
