@@ -18,22 +18,29 @@ setup_environment_files() {
     # Create .env file if it doesn't exist
     if [ ! -f .env ]; then
         touch .env
+        echo "GITHUB_TOKEN=" > .env
+        echo "LOG_LEVEL=" >> .env
+        echo "LOG_FILE=" >> .env
+    fi
+}
+
+check_environment_variables() {
+    setup_environment_files
+    # Exit if GITHUB_TOKEN not already present or is empty
+    if ! grep -q "GITHUB_TOKEN=" .env || [ -z "$(grep 'GITHUB_TOKEN' .env | cut -d '=' -f2 | tr -d '[:space:]')" ]; then
+        echo "WARNING: NO GITHUB TOKEN IS SET IN ENVIRONMENT"
     fi
 
-    # Add GITHUB_TOKEN if not already present
-    if ! grep -q "GITHUB_TOKEN=" .env; then
-        echo "GITHUB_TOKEN=" >> .env
+    # Exit if LOG_LEVEL not already present or is empty
+    if ! grep -q "LOG_LEVEL=" .env || [ -z "$(grep 'LOG_LEVEL' .env | cut -d '=' -f2 | tr -d '[:space:]')" ]; then
+        echo "WARNING: NO LOG LEVEL IS SET IN ENVIRONMENT"
     fi
 
-    # Add LOG_LEVEL if not already present
-    if ! grep -q "LOG_LEVEL=" .env; then
-        echo "LOG_LEVEL=info" >> .env
+    # Exit if LOG_FILE not already present or is empty
+    if ! grep -q "LOG_FILE=" .env || [ -z "$(grep 'LOG_FILE' .env | cut -d '=' -f2 | tr -d '[:space:]')" ]; then
+        echo "WARNING: NO LOG FILE IS SET IN ENVIRONMENT"
     fi
 
-    # Add LOG_FILE if not already present
-    if ! grep -q "LOG_FILE=" .env; then
-        echo "LOG_FILE=app.log" >> .env
-    fi
 }
 
 # Function to delete npm packages and related files
@@ -95,6 +102,7 @@ elif [ "$1" = "test" ]; then
 
 # Otherwise, treat it as a URL_FILE
 else
+    check_environment_variables
     run_project "$1"
     if [ $? -ne 0 ]; then
         # Check for module not found error

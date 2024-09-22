@@ -21,3 +21,8 @@ refresh:
 clean_js:
 	@find . -type f -name "*.js" -exec rm -f {} +
 	@find dist -mindepth 1 -delete
+
+reset:
+	@rm -rf node_modules
+	@find . -type f -name "*.js" -exec rm -f {} +
+	@find dist -mindepth 1 -delete

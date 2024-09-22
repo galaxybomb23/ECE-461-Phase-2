@@ -12,14 +12,14 @@ import { logMessage } from './logFile';
  * @param {string} url - The URL to test for accessibility.
  * @returns {Promise<boolean>} - A promise that resolves to true if the URL is accessible, otherwise false.
  */
-export async function test_url(url: string): Promise<boolean> {
+export async function testURL(url: string): Promise<boolean> {
     try {
-        logMessage('test_url', ['Checking URL accessibility.', `Testing URL: ${url}`]);
+        logMessage('testURL', ['Checking URL accessibility.', `Testing URL: ${url}`]);
         const response = await fetch(url, { method: 'HEAD' }); // Make a HEAD request to check accessibility
-        logMessage('test_url', ['URL accessibility check completed.', `Response OK: ${response.ok}`]);
+        logMessage('testURL', ['URL accessibility check completed.', `Response OK: ${response.ok}`]);
         return response.ok; // Return true if the response is successful
     } catch (error) {
-        logMessage('test_url', ['Error while checking URL accessibility.', `Error: ${error}`]);
+        logMessage('testURL', ['Error while checking URL accessibility.', `Error: ${error}`]);
         return false; // Return false if there was an error
     }
 }
@@ -33,18 +33,18 @@ export async function test_url(url: string): Promise<boolean> {
  * @param {string} url - The URL to evaluate.
  * @returns {string} - Returns "github" for GitHub URLs, "npmjs" for npmJS URLs, or "other" if neither.
  */
-export function url_type(url: string): string {
-    logMessage('url_type', ['Determining URL type.', `Evaluating URL: ${url}`]);
+export function URLType(url: string): string {
+    logMessage('URLType', ['Determining URL type.', `Evaluating URL: ${url}`]);
     
     let regex = new RegExp("(github|npmjs)\\.com", "i"); // Regex to match GitHub or npmJS domains
     let match = regex.exec(url);
     
     if (match) {
-        logMessage('url_type', ['Match found for URL type.', `Matched type: ${match[1]}`]);
+        logMessage('URLType', ['Match found for URL type.', `Matched type: ${match[1]}`]);
         return match[1]; // Return the matched type (github or npmjs)
     }
 
-    logMessage('url_type', ['No match found for URL type.', 'Returning "other".']);
+    logMessage('URLType', ['No match found for URL type.', 'Returning "other".']);
     return "other"; // Return "other" if no match is found
 }
 
@@ -55,21 +55,21 @@ export function url_type(url: string): string {
  * @param {string} filename - The path to the file containing the URLs.
  * @returns {string[] | number} An array of URLs if the file exists, or an empty array if the file is empty.
  */
-export function parse_urls(filename: string): string[] {
+export function parseURLs(filename: string): string[] {
     if (!fs.existsSync(filename)) {
-        logMessage('parse_urls', ['File does not exist.', `Filename: ${filename}`]);
+        logMessage('parseURLs', ['File does not exist.', `Filename: ${filename}`]);
         exit(1); // Exit if the file does not exist
     }
 
-    logMessage('parse_urls', ['File exists, reading content.', `Filename: ${filename}`]);
+    logMessage('parseURLs', ['File exists, reading content.', `Filename: ${filename}`]);
     const file_content = fs.readFileSync(filename, 'utf-8'); // Read the content of the file
 
     if (!file_content) {
-        logMessage('parse_urls', ['File content is empty.', 'Returning empty array.']);
+        logMessage('parseURLs', ['File content is empty.', 'Returning empty array.']);
         return []; // Return an empty array if the file content is empty
     }
 
-    logMessage('parse_urls', ['Parsing URLs from file content.', `Content length: ${file_content.length}`]);
+    logMessage('parseURLs', ['Parsing URLs from file content.', `Content length: ${file_content.length}`]);
     return file_content.split('\n'); // Return array of URLs split by newlines
 }
 
@@ -90,13 +90,13 @@ export async function get_valid_urls(filename: string): Promise<string[]> {
         exit(1);
     }
 
-    let url_array = parse_urls(filename); // Parse the URLs from the file
+    let url_array = parseURLs(filename); // Parse the URLs from the file
     let valid_urls: string[] = [];
 
     for (let i = 0; i < url_array.length; i++) {
         try {
             logMessage('get_valid_urls', ['Testing URL for validity.', `URL: ${url_array[i]}`]);
-            if (await test_url(url_array[i])) {
+            if (await testURL(url_array[i])) {
                 logMessage('get_valid_urls', ['Valid URL found.', `Adding URL: ${url_array[i]}`]);
                 valid_urls.push(url_array[i]); // Add valid URL to the list
             } else {

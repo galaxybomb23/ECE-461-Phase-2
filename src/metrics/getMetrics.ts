@@ -1,7 +1,7 @@
 import { getBusFactor } from "./busFactor";
 import { getLicenseScore } from "./license";
 import { formatJSON, initJSON } from "../json";
-import { url_type } from "../URL";
+import { URLType } from "../URL";
 import { getNodeJsAPILink } from "../npmjsData";
 import { calculateCorrectness } from "./correctness";
 import { calculateRampUp } from "./rampUp";
@@ -16,27 +16,27 @@ import { logMessage } from '../logFile';
  * @param {string} URL - The repository URL to analyze.
  * @returns {Promise<string>} A promise that resolves to a formatted JSON string containing the calculated metrics.
  */
-export async function get_metrics(URL: string): Promise<string> {
-    logMessage('get_metrics', ['Initializing metrics calculation.', 'Starting to create empty JSON.']);
+export async function getMetrics(URL: string): Promise<string> {
+    logMessage('getMetrics', ['Initializing metrics calculation.', 'Starting to create empty JSON.']);
   
     let repo_data = initJSON(); // Initialize an empty JSON object for storing results
-    logMessage('get_metrics', ['Empty JSON created.', 'Initialized repo_data.']);
+    logMessage('getMetrics', ['Empty JSON created.', 'Initialized repo_data.']);
 
-    logMessage('get_metrics', ['Fetching number of cores.', 'Calling getNumberOfCores.']);
+    logMessage('getMetrics', ['Fetching number of cores.', 'Calling getNumberOfCores.']);
     let num_cores = getNumberOfCores(); // Get the number of processing cores available
-    logMessage('get_metrics', ['Number of cores fetched.', `Cores: ${num_cores}`]);
+    logMessage('getMetrics', ['Number of cores fetched.', `Cores: ${num_cores}`]);
 
-    logMessage('get_metrics', ['Setting repository URL.', `URL: ${URL}`]);
+    logMessage('getMetrics', ['Setting repository URL.', `URL: ${URL}`]);
     repo_data.URL = URL; // Store the original URL in the JSON object
 
     // Convert npmjs URL to Node.js API link if necessary
-    if (url_type(URL) === "npmjs") {
-        logMessage('get_metrics', ['Converting npmjs URL to Node.js API link.', `Original URL: ${URL}`]);
+    if (URLType(URL) === "npmjs") {
+        logMessage('getMetrics', ['Converting npmjs URL to Node.js API link.', `Original URL: ${URL}`]);
         URL = await getNodeJsAPILink(URL); // Fetch the Node.js API link
-        logMessage('get_metrics', ['Converted npmjs URL.', `New URL: ${URL}`]);
+        logMessage('getMetrics', ['Converted npmjs URL.', `New URL: ${URL}`]);
     }
 
-    logMessage('get_metrics', ['Calculating metrics concurrently.', 'Starting Promise.all for metrics.']);
+    logMessage('getMetrics', ['Calculating metrics concurrently.', 'Starting Promise.all for metrics.']);
     
     // Fetch various metrics concurrently
     const [
@@ -53,7 +53,7 @@ export async function get_metrics(URL: string): Promise<string> {
         calculateResponsiveMaintainer(URL)
     ]);
 
-    logMessage('get_metrics', ['Metrics calculation complete.', 'Storing results in repo_data.']);
+    logMessage('getMetrics', ['Metrics calculation complete.', 'Storing results in repo_data.']);
 
     // Store the calculated metrics and their latencies in the JSON object
     repo_data.BusFactor = busFactorScore;
@@ -67,7 +67,7 @@ export async function get_metrics(URL: string): Promise<string> {
     repo_data.ResponsiveMaintainer = responsiveMaintainerScore;
     repo_data.ResponsiveMaintainer_Latency = responsiveMaintainerLatency;
 
-    logMessage('get_metrics', ['Results stored.', 'Calculating Net Score and Latency.']);
+    logMessage('getMetrics', ['Results stored.', 'Calculating Net Score and Latency.']);
 
     // Calculate the Net Score and its latency
     const netScore = await getNetScore(
@@ -78,7 +78,7 @@ export async function get_metrics(URL: string): Promise<string> {
         licenseScore
     );
 
-    logMessage('get_metrics', ['Net Score calculated.', `Net Score: ${netScore}`]);
+    logMessage('getMetrics', ['Net Score calculated.', `Net Score: ${netScore}`]);
 
     const netScore_Latency = await getNetScoreLatency(
         rampUpLatency,
@@ -88,13 +88,13 @@ export async function get_metrics(URL: string): Promise<string> {
         licenseLatency
     );
 
-    logMessage('get_metrics', ['Net Score Latency calculated.', `Net Score Latency: ${netScore_Latency}`]);
+    logMessage('getMetrics', ['Net Score Latency calculated.', `Net Score Latency: ${netScore_Latency}`]);
 
     // Store the Net Score and latency
     repo_data.NetScore = netScore;
     repo_data.NetScore_Latency = netScore_Latency;
 
-    logMessage('get_metrics', ['Returning formatted JSON data.', 'Finalizing metrics response.']);
+    logMessage('getMetrics', ['Returning formatted JSON data.', 'Finalizing metrics response.']);
   
     return formatJSON(repo_data); // Return the formatted JSON string
 }
