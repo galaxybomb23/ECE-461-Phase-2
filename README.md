@@ -94,7 +94,10 @@ We welcome contributions from the community. To contribute, please follow these 
 ## Contact
 If you have any questions, suggestions, or need further information, feel free to reach out:
 
-- **Project Lead**: Your Name  
+- **Project Lead**: Miller Kodish  
   Email: [mkodish@purdue.edu](mailto:mkodish@purdue.edu)
+  GitHub: [Miller11k](https://github.com/Miller11k)
 
-- GitHub: [Miller11k](https://github.com/Miller11k)
+- **Project Teammates**: Daniel Shkembi, Alfredo Barandearan, Francisco Ramirez 
+  Emails: [dshkembi@purdue.edu](mailto:dshkembi@purdue.edu), [abarande@purdue.edu](mailto:abarande@purdue.edu), [fjramire@purdue.edu](mailto:fjramire@purdue.edu)
+  GitHubs: [DanielShkembi](https://github.com/DanielShkembi), [Abarande](https://github.com/Abarande), [franjramirez](https://github.com/franjramirez)
