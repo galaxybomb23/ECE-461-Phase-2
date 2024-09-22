@@ -91,9 +91,6 @@ We welcome contributions from the community. To contribute, please follow these 
 - Follow the project’s coding style and best practices.
 - Cite any code snippets or tools reused from third-party sources, including links to the original posts (e.g., Stack Overflow).
 
-## License
-This project is licensed under the MIT License. For more details, see the [LICENSE](https://github.com/Miller11k/ECE-461/blob/main/src/metrics/license.ts) file in the repository.
-
 ## Contact
 If you have any questions, suggestions, or need further information, feel free to reach out:
 
