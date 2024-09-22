@@ -2,26 +2,20 @@
 
 # Function to install npm packages
 install_npm_packages() {
-    # Attempt to install npm packages
     if ! npm install; then
-        echo "npm install failed"
         exit 1
     fi
-    # Install the latest version of axios
     npm install axios@latest
 }
 
 # Function to compile both project and test files into dist directory
 compile_all() {
-    # Compile TypeScript files (in dist)
     tsc
-    # Compile Test Files (in dist)
     tsc -p tsconfig.test.json
 }
 
 # Function to set up environment files
 setup_environment_files() {
-    # Create .env file if it doesn't exist
     if [ ! -f .env ]; then
         touch .env
         echo "GITHUB_TOKEN=" > .env
@@ -31,30 +25,27 @@ setup_environment_files() {
 }
 
 check_environment_variables() {
-    setup_environment_files
-    # Exit if GITHUB_TOKEN not already present or is empty
-    if ! grep -q "GITHUB_TOKEN=" .env || [ -z "$(grep 'GITHUB_TOKEN' .env | cut -d '=' -f2 | tr -d '[:space:]')" ]; then
-        echo "WARNING: NO GITHUB TOKEN IS SET IN ENVIRONMENT"
-    fi
+    if [ -f .env ]; then
+        if ! grep -q "GITHUB_TOKEN=" .env || [ -z "$(grep 'GITHUB_TOKEN' .env | cut -d '=' -f2 | tr -d '[:space:]')" ]; then
+            exit 1
+        fi
 
-    # Exit if LOG_LEVEL not already present or is empty
-    if ! grep -q "LOG_LEVEL=" .env || [ -z "$(grep 'LOG_LEVEL' .env | cut -d '=' -f2 | tr -d '[:space:]')" ]; then
-        echo "WARNING: NO LOG LEVEL IS SET IN ENVIRONMENT"
-    fi
+        if ! grep -q "LOG_LEVEL=" .env || [ -z "$(grep 'LOG_LEVEL' .env | cut -d '=' -f2 | tr -d '[:space:]')" ]; then
+            exit 1
+        fi
 
-    # Exit if LOG_FILE not already present or is empty
-    if ! grep -q "LOG_FILE=" .env || [ -z "$(grep 'LOG_FILE' .env | cut -d '=' -f2 | tr -d '[:space:]')" ]; then
-        echo "WARNING: NO LOG FILE IS SET IN ENVIRONMENT"
+        if ! grep -q "LOG_FILE=" .env || [ -z "$(grep 'LOG_FILE' .env | cut -d '=' -f2 | tr -d '[:space:]')" ]; then
+            :
+        fi
+    else
+        exit 1
     fi
-
 }
 
 # Function to delete npm packages and related files
 delete_npm_packages() {
-    # Remove all JavaScript files and contents of dist directory
     find . -type f -name "*.js" -exec rm -f {} +
     find dist -mindepth 1 -delete
-    # Remove node_modules directory
     rm -rf node_modules
 }
 
@@ -66,15 +57,13 @@ process_url_file() {
 
 # Function to run the project
 run_project() {
-    # Check if compiled JavaScript file exists
+    check_environment_variables
     if [ -f "dist/index.js" ]; then
         node dist/index.js "$1"
     else
-        # Compile TypeScript and run the project
         if compile_all; then
             node dist/index.js "$1"
         else
-            echo "TypeScript compilation failed."
             exit 1
         fi
     fi
@@ -82,53 +71,27 @@ run_project() {
 
 # Function to run tests
 run_tests() {
-    echo "Running tests..."
-    # Add your test commands here
-    # For example: npm test or any specific test command
     npm test
 }
 
 # Main script execution
 
-# Check for exactly 1 argument
 if [ "$#" -ne 1 ]; then
-    echo "Usage: $0 <install|URL_FILE|test>"
     exit 1
 fi
 
-# Check if the argument is "install"
 if [ "$1" = "install" ]; then
     install_npm_packages
     setup_environment_files
     compile_all
-
-# Check if the argument is "test"
 elif [ "$1" = "test" ]; then
     run_tests
-
-# Otherwise, treat it as a URL_FILE
 else
-    check_environment_variables
-    run_project "$1"
-    if [ $? -ne 0 ]; then
-        # Check for module not found error
-        if grep -q "Cannot find module" <<< "$(node dist/index.js "$1" 2>&1)"; then
-            while true; do
-                echo "Module not found. Would you like to refresh the packages? (Y/n)"
-                read -r response
-                if [ "$response" = "Y" ]; then
-                    delete_npm_packages
-                    install_npm_packages
-                    setup_environment_files
-                    run_project "$1"
-                    break
-                elif [ "$response" = "n" ]; then
-                    exit 1
-                else
-                    echo "Invalid response. Please enter 'Y' or 'n'."
-                fi
-            done
-        fi
+    if [ -f "$1" ]; then
+        process_url_file "$1"
+        run_project "$1"
+    else
+        exit 1
     fi
 fi
 
