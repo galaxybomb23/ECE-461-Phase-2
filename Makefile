@@ -32,8 +32,8 @@ test:
 # This target cleans up the JavaScript files, removes the `node_modules`, reinstalls all dependencies,
 # and ensures the latest version of `axios` is installed.
 refresh:
-	# Find and remove all JavaScript files recursively (`-type f -name "*.js"`) and delete them.
-	@find . -type f -name "*.js" -exec rm -f {} +
+	# Find and remove all JavaScript files recursively (`-type f -name "*.js"`) and delete them, except `jest.config.js`.
+	@find . -type f -name "*.js" ! -name "jest.config.js" -exec rm -f {} +
 	# Delete everything within the `dist` directory, but keep the `dist` folder itself.
 	@find dist -mindepth 1 -delete
 	# Remove the `node_modules` directory to ensure all dependencies are reinstalled.
