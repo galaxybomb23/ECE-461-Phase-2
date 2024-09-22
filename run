@@ -2,50 +2,63 @@
 
 # Function to install npm packages
 install_npm_packages() {
+    # Attempt to install npm packages; exit if it fails
     if ! npm install; then
         exit 1
     fi
+    # Install the latest version of axios
     npm install axios@latest
 }
 
-# Function to compile both project and test files into dist directory
+# Function to compile both project and test files into the dist directory
 compile_all() {
+    # Compile project TypeScript files
     tsc
+    # Compile test TypeScript files using a separate configuration
     tsc -p tsconfig.test.json
 }
 
 # Function to set up environment files
 setup_environment_files() {
+    # Create .env file if it doesn't exist
     if [ ! -f .env ]; then
         touch .env
-        echo "GITHUB_TOKEN=" > .env
-        echo "LOG_LEVEL=" >> .env
-        echo "LOG_FILE=" >> .env
+        echo "GITHUB_TOKEN=" > .env  # Placeholder for GitHub token
+        echo "LOG_LEVEL=" >> .env      # Placeholder for log level
+        echo "LOG_FILE=" >> .env       # Placeholder for log file
     fi
 }
 
+# Function to check environment variables in the .env file
 check_environment_variables() {
+    # If the .env file exists, check for required variables
     if [ -f .env ]; then
+        # Check for GITHUB_TOKEN; exit if not set
         if ! grep -q "GITHUB_TOKEN=" .env || [ -z "$(grep 'GITHUB_TOKEN' .env | cut -d '=' -f2 | tr -d '[:space:]')" ]; then
             exit 1
         fi
 
+        # Check for LOG_LEVEL; exit if not set
         if ! grep -q "LOG_LEVEL=" .env || [ -z "$(grep 'LOG_LEVEL' .env | cut -d '=' -f2 | tr -d '[:space:]')" ]; then
             exit 1
         fi
 
+        # Check for LOG_FILE; warn if not set (but do not exit)
         if ! grep -q "LOG_FILE=" .env || [ -z "$(grep 'LOG_FILE' .env | cut -d '=' -f2 | tr -d '[:space:]')" ]; then
             :
         fi
-    else
+    else    # Environment file does not exist; return error
         exit 1
     fi
 }
 
 # Function to delete npm packages and related files
 delete_npm_packages() {
+    # Remove all JavaScript files in the current directory
     find . -type f -name "*.js" -exec rm -f {} +
+    # Remove all files in the dist directory
     find dist -mindepth 1 -delete
+    # Remove node_modules directory
     rm -rf node_modules
 }
 
@@ -57,42 +70,50 @@ process_url_file() {
 
 # Function to run the project
 run_project() {
-    check_environment_variables
+    check_environment_variables  # Ensure environment variables are set
+    # Check if the compiled JavaScript file exists
     if [ -f "dist/index.js" ]; then
-        node dist/index.js "$1"
+        node dist/index.js "$1"  # Run the project if the file exists
     else
+        # Compile TypeScript files if JavaScript file doesn't exist
         if compile_all; then
-            node dist/index.js "$1"
+            node dist/index.js "$1"  # Run the project after compilation
         else
-            exit 1
+            exit 1  # Exit if compilation fails
         fi
     fi
 }
 
 # Function to run tests
 run_tests() {
-    npm test
+    npm test  # Execute the test command
 }
 
 # Main script execution
 
+# Check for exactly 1 argument; exit if not
 if [ "$#" -ne 1 ]; then
     exit 1
 fi
 
+# Check if the argument is "install"
 if [ "$1" = "install" ]; then
-    install_npm_packages
-    setup_environment_files
-    compile_all
+    install_npm_packages  # Install npm packages
+    setup_environment_files  # Set up environment files
+    compile_all  # Compile project files
+
+# Check if the argument is "test"
 elif [ "$1" = "test" ]; then
-    run_tests
+    run_tests  # Run tests
+
+# Otherwise, treat it as a URL_FILE
 else
     if [ -f "$1" ]; then
-        process_url_file "$1"
-        run_project "$1"
+        process_url_file "$1"  # Process the URL file
+        run_project "$1"  # Run the project with the URL file
     else
-        exit 1
+        exit 1  # Exit if the URL file does not exist
     fi
 fi
 
-exit 0
+exit 0  # Successful exit
