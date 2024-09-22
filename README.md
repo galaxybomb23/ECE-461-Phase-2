@@ -18,7 +18,7 @@ Make sure the following dependencies are installed:
 ### Steps
 1. Clone the project repository:
     ```bash
-    git clone https://github.com/yourusername/your-repo-name.git
+    git clone https://github.com/Miller11k/ECE-461.git
     ```
 
 2. Install project dependencies:
@@ -94,10 +94,20 @@ We welcome contributions from the community. To contribute, please follow these 
 ## Contact
 If you have any questions, suggestions, or need further information, feel free to reach out:
 
-- **Project Lead**: Miller Kodish  
+- **Project Lead**:
+### Miller Kodish  
   Email: [mkodish@purdue.edu](mailto:mkodish@purdue.edu)
   GitHub: [Miller11k](https://github.com/Miller11k)
 
-- **Project Teammates**: Daniel Shkembi, Alfredo Barandearan, Francisco Ramirez 
-  Emails: [dshkembi@purdue.edu](mailto:dshkembi@purdue.edu), [abarande@purdue.edu](mailto:abarande@purdue.edu), [fjramire@purdue.edu](mailto:fjramire@purdue.edu)
-  GitHubs: [DanielShkembi](https://github.com/DanielShkembi), [Abarande](https://github.com/Abarande), [franjramirez](https://github.com/franjramirez)
+- **Project Team Members**:
+### Daniel Shkembi
+- **Email:** [dshkembi@purdue.edu](mailto:dshkembi@purdue.edu)
+- **GitHub:** [DanielShkembi](https://github.com/DanielShkembi)
+
+## Alfredo Barandearan
+- **Email:** [abarande@purdue.edu](mailto:abarande@purdue.edu)
+- **GitHub:** [Abarande](https://github.com/Abarande)
+
+## Francisco Ramirez
+- **Email:** [fjramire@purdue.edu](mailto:fjramire@purdue.edu)
+- **GitHub:** [franjramirez](https://github.com/franjramirez)
