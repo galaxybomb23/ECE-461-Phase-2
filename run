@@ -61,11 +61,36 @@ delete_npm_packages() {
     # Remove node_modules directory
     rm -rf node_modules
 }
+=======
+    # Run the tests and capture the output
+    output=$(npm test -- --coverage --silent 2>&1)
+>>>>>>> Stashed changes
 
-# Function to process the URL_FILE
-process_url_file() {
-    local url_file="$1"
-    # Add your URL_FILE processing tasks here
+    # Print the captured output for debugging
+
+
+    # Extract the number of passing and total tests using standard grep/sed
+    passed=$(echo "$output" | grep 'Tests:.*passed' | sed -E 's/Tests:.* ([0-9]+) passed.*/\1/')
+    total=$(echo "$output" | grep 'Tests:.*total' | sed -E 's/Tests:.* ([0-9]+) total.*/\1/')
+
+    # Extract the line coverage percentage from the coverage summary
+    coverage=$(echo "$output" | grep -A 0 'All files' | tail -n 1 | awk -F'|' '{print $5}' | tr -d ' ' | sed 's/%//')
+
+    # Ensure we have valid values, and if tests were successful (passed == total)
+    if [ -z "$passed" ] || [ -z "$total" ] || [ -z "$coverage" ]; then
+        echo "Error: Unable to extract test results."
+        exit 1
+    fi
+
+    # Format output correctly
+    echo "$passed/$total test cases passed. $coverage% line coverage achieved."
+
+    # Check if all tests passed
+    if [ "$passed" -eq "$total" ]; then
+        exit 0
+    else
+        exit 1
+    fi
 }
 
 # Function to run the project

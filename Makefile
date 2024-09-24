@@ -60,5 +60,5 @@ clean_js:
 
 reset:
 	@rm -rf node_modules
-	@find . -type f -name "*.js" -exec rm -f {} +
+	@find . -type f -name "*.js" ! -name "jest.config.js" -exec rm -f {} +
 	@find dist -mindepth 1 -delete
