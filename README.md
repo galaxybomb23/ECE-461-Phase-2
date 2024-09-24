@@ -35,12 +35,12 @@ Make sure the following dependencies are installed:
 The CLI is designed to analyze npm modules by interacting with GitHub repositories and running metric evaluations. To run the tool, use the following command:
 
 ```bash
-npm run cli -- [OPTIONS]
+npm ./run cli -- [OPTIONS]
 ```
 
 Example:
 ```bash
-npm run cli -- --repo https://github.com/user/repository --metrics correctness,license
+npm ./run cli -- --repo https://github.com/user/repository --metrics correctness,license
 ```
 
 ## Options
