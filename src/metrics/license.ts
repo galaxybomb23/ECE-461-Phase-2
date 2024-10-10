@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import git from 'isomorphic-git';
 import http from 'isomorphic-git/http/node';
+import axios from 'axios';
 import { getTimestampWithThreeDecimalPlaces } from './getLatency';
 import { logMessage } from '../logFile';
 
@@ -12,7 +13,8 @@ export async function getLicenseScore(URL: string): Promise<{ score: number, lat
     logMessage('getLicenseScore', ['Latency tracking started.', `Start timestamp: ${latency_start}`]);
 
     const repoDir = './temp-repo'; // Directory to clone the repo into
-    const gitURL = URL.replace('https://github.com/', 'https://'); // Format URL for isomorphic-git
+    let gitURL: string | null = "";
+    gitURL = URL.replace(/^git\+/, '').replace(/^ssh:\/\/git@github.com/, 'https://github.com').replace(/\.git$/, '').replace(/^git:\/\//, 'https://');
 
     try {
         // Clone the repository
@@ -27,13 +29,12 @@ export async function getLicenseScore(URL: string): Promise<{ score: number, lat
         logMessage('getLicenseScore', ['Repository cloned successfully.', `Repository URL: ${gitURL}`]);
 
         // Check for a LICENSE file in the root of the repo
-        const licenseFilePath: string = path.join(repoDir, 'LICENSE');
+        const licenseInfo = await extractLicenseInfo(repoDir);
         let license_score: number = 0;
         
-        if (fs.existsSync(licenseFilePath)) {
+        if (licenseInfo) {
             // Read the LICENSE file content
-            const licenseText = fs.readFileSync(licenseFilePath, 'utf8');
-            license_score = checkLicenseCompatibility(licenseText);
+            license_score = checkLicenseCompatibility(licenseInfo);
             logMessage('getLicenseScore', ['LICENSE file found and compatibility checked.', `Score: ${license_score}`]);
         } else {
             logMessage('getLicenseScore', ['No LICENSE file found.', 'Score remains 0.']);
@@ -52,6 +53,41 @@ export async function getLicenseScore(URL: string): Promise<{ score: number, lat
         fs.rmSync(repoDir, { recursive: true, force: true });
         logMessage('getLicenseScore', ['Temporary repository directory cleaned up.', `Directory: ${repoDir}`]);
     }
+}
+
+async function extractLicenseInfo(cloneDir: string): Promise<string | null> {
+    let licenseInfo: string | null = null;
+
+    // Case-insensitive file search for README (e.g., README.md, README.MD)
+    const readmeFiles = fs.readdirSync(cloneDir).filter(file =>
+        file.match(/^readme\.(md|txt)?$/i)
+    );
+
+    if (readmeFiles.length > 0) {
+        const readmePath = path.join(cloneDir, readmeFiles[0]);
+        const readmeContent = fs.readFileSync(readmePath, 'utf-8');
+        const licenseSection = readmeContent.match(/##\s*(Licence|Legal)(\s|\S)*/i);
+        if (licenseSection) {
+            licenseInfo = licenseSection[0];
+        }
+    }
+
+    // Case-insensitive file search for LICENSE (e.g., LICENSE.txt, license.md)
+    const licenseFiles = fs.readdirSync(cloneDir).filter(file =>
+        file.match(/^licen[sc]e(\..*)?$/i)
+    );
+
+    if (licenseFiles.length > 0) {
+        const licenseFilePath = path.join(cloneDir, licenseFiles[0]);
+        const licenseContent = fs.readFileSync(licenseFilePath, 'utf-8');
+        if (licenseInfo) {
+            licenseInfo += '\n' + licenseContent;
+        } else {
+            licenseInfo = licenseContent;
+        }
+    }
+
+    return licenseInfo;
 }
 
 function checkLicenseCompatibility(licenseText: string): number {
