@@ -27,11 +27,11 @@ export async function getNetScore(
     let net_score = 0;
 
     // Add weighted contributions to the net score
-    net_score += (0.2) * license;             // Weighted License score (20%)
     net_score += (0.25) * bus_factor;         // Weighted Bus Factor Score (25%)
     net_score += (0.25) * responsive_maintainer; // Weighted Responsive Maintainer Score (25%)
     net_score += (0.2) * correctness;         // Weighted Correctness score (20%)
     net_score += (0.1) * ramp_up_time;       // Weighted Ramp-Up Time score (10%)
+    net_score = license ? net_score + 0.2 : 0;          // Weighted License score (20%)
 
     logMessage('getNetScore', ['Net score calculated before rounding.', `Net score: ${net_score}`]);
 
