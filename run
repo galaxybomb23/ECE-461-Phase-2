@@ -13,9 +13,9 @@ install_npm_packages() {
 # Function to compile both project and test files into the dist directory
 compile_all() {
     # Compile project TypeScript files
-    tsc
+    npx tsc
     # Compile test TypeScript files using a separate configuration
-    tsc -p tsconfig.test.json
+    npx tsc -p tsconfig.test.json
 }
 
 # Function to set up environment files
