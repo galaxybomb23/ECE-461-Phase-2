@@ -2,9 +2,10 @@ import * as fs from 'fs';
 import * as path from 'path';
 import git from 'isomorphic-git';
 import http from 'isomorphic-git/http/node';
-import axios from 'axios';
 import { getTimestampWithThreeDecimalPlaces } from './getLatency';
 import { logMessage } from '../logFile';
+
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN; // Store your token in environment variables for security
 
 export async function getLicenseScore(URL: string): Promise<{ score: number, latency: number }> {
     logMessage('getLicenseScore', ['Starting license score calculation.', `URL: ${URL}`]);
@@ -14,7 +15,10 @@ export async function getLicenseScore(URL: string): Promise<{ score: number, lat
 
     const repoDir = './temp-repo'; // Directory to clone the repo into
     let gitURL: string | null = "";
-    gitURL = URL.replace(/^git\+/, '').replace(/^ssh:\/\/git@github.com/, 'https://github.com').replace(/\.git$/, '').replace(/^git:\/\//, 'https://');
+    gitURL = URL.replace(/^git\+/, '')
+                .replace(/^ssh:\/\/git@github.com/, 'https://github.com')
+                .replace(/\.git$/, '')
+                .replace(/^git:\/\//, 'https://');
 
     try {
         // Clone the repository
@@ -24,7 +28,11 @@ export async function getLicenseScore(URL: string): Promise<{ score: number, lat
             dir: repoDir,
             url: gitURL,
             singleBranch: true,
-            depth: 1 // Only clone the latest commit for performance
+            depth: 1, // Only clone the latest commit for performance
+            onAuth: () => ({
+                username: GITHUB_TOKEN, // Use the GitHub token as the username
+                password: 'x-oauth-basic' // GitHub tokens are passed as the password
+            })
         });
         logMessage('getLicenseScore', ['Repository cloned successfully.', `Repository URL: ${gitURL}`]);
 
@@ -58,8 +66,14 @@ export async function getLicenseScore(URL: string): Promise<{ score: number, lat
 async function extractLicenseInfo(cloneDir: string): Promise<string | null> {
     let licenseInfo: string | null = null;
 
+    // Ensure the directory exists
+    if (!fs.existsSync(cloneDir)) {
+        console.error(`Directory does not exist: ${cloneDir}`);
+        return null;
+    }
+
     // Case-insensitive file search for README (e.g., README.md, README.MD)
-    const readmeFiles = fs.readdirSync(cloneDir).filter(file =>
+    const readmeFiles = fs.readdirSync(cloneDir)?.filter(file =>
         file.match(/^readme\.(md|txt)?$/i)
     );
 
@@ -73,7 +87,7 @@ async function extractLicenseInfo(cloneDir: string): Promise<string | null> {
     }
 
     // Case-insensitive file search for LICENSE (e.g., LICENSE.txt, license.md)
-    const licenseFiles = fs.readdirSync(cloneDir).filter(file =>
+    const licenseFiles = fs.readdirSync(cloneDir)?.filter(file =>
         file.match(/^licen[sc]e(\..*)?$/i)
     );
 
@@ -103,6 +117,7 @@ function checkLicenseCompatibility(licenseText: string): number {
         'BSD-3-Clause',
         'Apache-2.0',
         'MPL-1.1',
+        'GNU GENERAL PUBLIC LICENSE',
     ];
 
     // Simple regex to find the license type in the text
